@@ -614,6 +614,7 @@ function DQuestFrame_OnEvent(event)
     
     if not wasVisible then
         ShowUIPanel(DQuestFrame);
+		DQuestFrame:EnableKeyboard(true);
     end
     
     if (not DQuestFrame:IsVisible()) then
@@ -724,7 +725,7 @@ function DQuestFrame_GetXPRewardText()
 end
 
 function DQuestFrameRewardPanel_OnShow()
-    DQuestFrame:EnableKeyboard(false);
+    DQuestFrame:EnableKeyboard(true);
     DQuestFrameDetailPanel:Hide();
     DQuestFrameGreetingPanel:Hide();
     DQuestFrameProgressPanel:Hide();
@@ -877,7 +878,7 @@ function DQuestItem_OnLeave()
 end
 
 function DQuestFrameProgressPanel_OnShow()
-    DQuestFrame:EnableKeyboard(false);
+    DQuestFrame:EnableKeyboard(true);
     DQuestFrameRewardPanel:Hide();
     DQuestFrameDetailPanel:Hide();
     DQuestFrameGreetingPanel:Hide();
@@ -1353,29 +1354,56 @@ end
 function DQuestFrame_OnKeyDown()
     local key = arg1;
     
-    -- Список клавиш движения
+    -- Список клавиш движения (SPACE убран!)
     local movementKeys = {
         W = true, A = true, S = true, D = true,
         UP = true, DOWN = true, LEFT = true, RIGHT = true,
-        SPACE = true, NUMPAD1 = true, NUMPAD2 = true, NUMPAD3 = true,
+        NUMPAD1 = true, NUMPAD2 = true, NUMPAD3 = true,
         NUMPAD4 = true, NUMPAD6 = true, NUMPAD7 = true, NUMPAD8 = true, NUMPAD9 = true
     }
     
-    -- Если нажата клавиша движения - НЕ обрабатываем её, передаём в игру
     if movementKeys[key] then
-        -- Немедленно отключаем захват клавиатуры
         DQuestFrame:EnableKeyboard(false);
-        -- Передаём управление игре
         return;
     end
     
-    -- Обработка ESC - закрываем окно
     if key == "ESCAPE" then
         HideUIPanel(DQuestFrame);
+        DQuestFrame:EnableKeyboard(false);  -- Отключаем при закрытии
         return;
     end
+    
+    -- Обработка ПРОБЕЛА
+    if key == "SPACE" then
+        -- Принятие квеста на панели деталей
+        if DQuestFrameDetailPanel and DQuestFrameDetailPanel:IsVisible() then
+            if DQuestFrameAcceptButton and DQuestFrameAcceptButton:IsEnabled() then
+                AcceptQuest();
+                PlaySound("igQuestListComplete");
+                return;
+            end
+        -- Завершение квеста на панели наград
+        elseif DQuestFrameRewardPanel and DQuestFrameRewardPanel:IsVisible() then
+            if DQuestFrameCompleteQuestButton and DQuestFrameCompleteQuestButton:IsEnabled() then
+                if (DQuestFrameRewardPanel.itemChoice == 0 and GetNumQuestChoices() > 0) then
+                    QuestChooseRewardError();
+                else
+                    GetQuestReward(DQuestFrameRewardPanel.itemChoice);
+                    PlaySound("igQuestListComplete");
+                end
+                return;
+            end
+        -- Завершение квеста на панели прогресса
+        elseif DQuestFrameProgressPanel and DQuestFrameProgressPanel:IsVisible() then
+            if DQuestFrameCompleteButton and DQuestFrameCompleteButton:IsEnabled() then
+                CompleteQuest();
+                PlaySound("igQuestListComplete");
+                return;
+            end
+        end
+    end
 
-    -- Обработка цифровых клавиш 1-9 для выбора квестов
+    -- Обработка цифровых клавиш 1-9
     if (key >= "1" and key <= "9") then
         local buttonNum = tonumber(key);
         
@@ -1401,7 +1429,7 @@ function DQuestFrame_OnKeyDown()
 end
 
 function DQuestFrame_OnShow()
-    DQuestFrame:EnableKeyboard(false); 
+    -- DQuestFrame:EnableKeyboard(false);
     PlaySound("igQuestListOpen");
     
     if DialogUI_ApplyAlpha then
@@ -1442,6 +1470,7 @@ function DQuestFrame_OnShow()
 end
 
 function DQuestFrame_OnHide()
+    DQuestFrame:EnableKeyboard(false);
     DQuestFrame:SetScript("OnUpdate", nil);
     
     DQuestFrameGreetingPanel:Hide();
@@ -1846,7 +1875,7 @@ function DQuestFrameItems_Update(questState)
 end
 
 function DQuestFrameDetailPanel_OnShow()
-    DQuestFrame:EnableKeyboard(false);
+    DQuestFrame:EnableKeyboard(true);
     DQuestFrameRewardPanel:Hide();
     DQuestFrameProgressPanel:Hide();
     DQuestFrameGreetingPanel:Hide();
