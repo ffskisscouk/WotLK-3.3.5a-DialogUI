@@ -27,55 +27,55 @@ local talentWipePending = false
 local binderPending = false
 local gossipCloseTimer = nil
 
--- Константы для структуры данных с значениями по умолчанию
+-- Constants for data structure with default values
 local GOSSIP_AVAILABLE_FIELDS = 2;  -- title, level, isTrivial, isDaily, isRepeatable
-local GOSSIP_ACTIVE_FIELDS = 2;    -- Будет определено динамически
+local GOSSIP_ACTIVE_FIELDS = 2;    -- Will be determined dynamically
 local GOSSIP_OPTIONS_FIELDS = 2;     -- text, type
 
 local gossipOpenTime = 0
-local GOSSIP_MIN_OPEN_TIME = 0.5 -- Минимальное время в секундах перед закрытием
+local GOSSIP_MIN_OPEN_TIME = 0.5 -- Minimum time in seconds before closing
 
--- ИСПРАВЛЕНО: Флаг для отслеживания QUEST_GREETING
+-- Flag for tracking QUEST_GREETING
 local questGreetingPending = false
 local questGreetingTimer = nil
 
--- Функция для определения количества полей в активных квестах
+-- Function to determine the number of fields in active quests
 local function DetermineActiveQuestFields()
-    -- Если уже определено, возвращаем сохраненное значение
+    -- If already determined, return the saved value
     if GOSSIP_ACTIVE_FIELDS then
         return GOSSIP_ACTIVE_FIELDS;
     end
     
-    -- Пробуем получить тестовые данные
+    -- Try to get test data
     local testQuests = {GetGossipActiveQuests()};
     local testSize = table.getn(testQuests);
     
     if testSize > 0 then
-        -- Пробуем разные варианты
+        -- Try different variants
         if testSize % 4 == 0 then
-            GOSSIP_ACTIVE_FIELDS = 4;  -- Стандартный формат
+            GOSSIP_ACTIVE_FIELDS = 4;  -- Standard format
         elseif testSize % 3 == 0 then
-            GOSSIP_ACTIVE_FIELDS = 3;  -- Альтернативный формат
+            GOSSIP_ACTIVE_FIELDS = 3;  -- Alternative format
         elseif testSize % 2 == 0 then
-            GOSSIP_ACTIVE_FIELDS = 2;  -- Упрощенный формат (только название и уровень)
+            GOSSIP_ACTIVE_FIELDS = 2;  -- Simplified format (name and level only)
         else
-            GOSSIP_ACTIVE_FIELDS = 4;  -- По умолчанию
+            GOSSIP_ACTIVE_FIELDS = 4;  -- Default
         end
     else
-        GOSSIP_ACTIVE_FIELDS = 4;  -- Значение по умолчанию
+        GOSSIP_ACTIVE_FIELDS = 4;  -- Default value
     end
     
     return GOSSIP_ACTIVE_FIELDS;
 end
 
--- Функция для сброса определения полей (можно вызывать при необходимости)
+-- Function to reset field determination (can be called when needed)
 local function ResetActiveQuestFields()
     GOSSIP_ACTIVE_FIELDS = nil;
 end
 
--- ИСПРАВЛЕНО: Функция проверки, имеет ли NPC квесты через QUEST_GREETING
+-- Function to check whether an NPC has quests via QUEST_GREETING
 local function HasQuestGreetingQuests()
-    -- Проверяем стандартные API приветствия
+    -- Check standard greeting APIs
     local numActive = GetNumActiveQuests();
     local numAvailable = GetNumAvailableQuests();
     
@@ -86,10 +86,10 @@ local function HasQuestGreetingQuests()
     return false;
 end
 
--- ИСПРАВЛЕНО: Функция проверки, является ли NPC тренером или другим специальным типом
--- который использует QUEST_GREETING вместо GOSSIP_SHOW для квестов
+-- Function to check whether an NPC is a trainer or other special type
+-- that uses QUEST_GREETING instead of GOSSIP_SHOW for quests
 local function IsSpecialQuestNPC()
-    -- Получаем gossip опции
+    -- Get gossip options
     local gossipOptions = {GetGossipOptions()};
     local numOptions = 0;
     
@@ -97,16 +97,16 @@ local function IsSpecialQuestNPC()
         numOptions = math.floor(table.getn(gossipOptions) / GOSSIP_OPTIONS_FIELDS);
     end
     
-    -- Если есть только одна опция и это "trainer" или "unlearn",
-    -- то это тренер с QUEST_GREETING квестами
+    -- If there is only one option and it is "trainer" or "unlearn",
+    -- then this is a trainer with QUEST_GREETING quests
     if numOptions == 1 then
-        local optionType = gossipOptions[2]; -- тип второго элемента в паре (text, type)
+        local optionType = gossipOptions[2]; -- type of the second element in the pair (text, type)
         if optionType == "trainer" or optionType == "unlearn" or optionType == "battlemaster" then
             return true;
         end
     end
     
-    -- Проверяем gossip текст - если он пустой или стандартный для тренера
+    -- Check gossip text - if it is empty or the standard trainer text
     local gossipText = GetGossipText();
     if gossipText and (gossipText == "" or string.find(string.lower(gossipText), "i can instruct you")) then
         return true;
@@ -161,7 +161,7 @@ function DGossipFrame_OnLoad()
     this:RegisterEvent("CONFIRM_BINDER");
     this:RegisterEvent("GOSSIP_CONFIRM");
     
-    -- ИСПРАВЛЕНО: Регистрируем QUEST_GREETING для обработки конфликтов
+    -- Register QUEST_GREETING to handle conflicts
     this:RegisterEvent("QUEST_GREETING");
 
     this:SetMovable(true);
@@ -266,7 +266,7 @@ function DGossipFrame_OnEvent()
     end
 
     if (event == "GOSSIP_SHOW") then
-        -- ИСПРАВЛЕНО: Получаем данные несколькими способами для надежности
+        -- Get data in several ways for reliability
         local availableQuests = {GetGossipAvailableQuests()};
         local activeQuests = {GetGossipActiveQuests()};
         local gossipOptions = {GetGossipOptions()};
@@ -274,7 +274,7 @@ function DGossipFrame_OnEvent()
         local numAvailable = GetNumGossipAvailableQuests();
         local numActive = GetNumGossipActiveQuests();
         
-        -- Вычисляем количество из данных если API вернул 0
+        -- Calculate count from data if API returned 0
         local availCount = table.getn(availableQuests);
         local activeCount = table.getn(activeQuests);
         
@@ -304,30 +304,30 @@ function DGossipFrame_OnEvent()
             end
         end
         
-        -- ИСПРАВЛЕНО: Правильно вычисляем количество опций
+        -- Correctly calculate the number of options
         local numOptions = 0;
         local optionsCount = table.getn(gossipOptions);
-        -- Каждая опция состоит из 2 элементов: текст и тип
+        -- Each option consists of 2 elements: text and type
         if optionsCount > 0 then
             numOptions = math.floor(optionsCount / 2);
         end
         
-        -- ИСПРАВЛЕНО: Если GetGossipOptions вернул пусто, пробуем другие методы
-        -- Иногда в 3.3.5 опции могут быть доступны через другие API
+        -- If GetGossipOptions returned empty, try other methods
+        -- Sometimes in 3.3.5 options may be available through other APIs
         if numOptions == 0 then
-            -- Проверяем, есть ли текст gossip - если есть, значит окно должно быть
+            -- Check if there is gossip text - if so, the window should be shown
             local gossipText = GetGossipText();
             if gossipText and gossipText ~= "" then
-                -- Проверяем стандартное окно - если оно есть опции, используем их
+                -- Check the standard window - if it has options, use them
                 if GossipFrame and GossipFrameGreetingPanel then
-                    -- Пытаемся получить опции из стандартного фрейма
+                    -- Try to get options from the standard frame
                     local standardOptions = {};
                     for i = 1, 32 do
                         local button = getglobal("GossipTitleButton" .. i);
                         if button and button:IsVisible() and button:GetText() then
                             local text = button:GetText();
                             local iconType = "gossip";
-                            -- Определяем тип по тексту или иконке
+                            -- Determine type by text or icon
                             if button.type then
                                 iconType = button.type;
                             end
@@ -348,13 +348,13 @@ function DGossipFrame_OnEvent()
         DebugMsg(string.format("DEBUG: GOSSIP_SHOW - numActive=%d, numAvailable=%d, numOptions=%d (raw=%d)", 
             numActive, numAvailable, numOptions, optionsCount));
 
-        -- ИСПРАВЛЕНО: Показываем окно если есть что-либо (квесты ИЛИ опции ИЛИ просто текст)
+        -- Show the window if there is anything (quests OR options OR just text)
         local gossipText = GetGossipText();
         local hasContent = (numActive > 0) or (numAvailable > 0) or (numOptions > 0) or 
                           (gossipText and gossipText ~= "");
         
         if hasContent then
-            -- Сохраняем данные
+            -- Save data
             savedGossipQuests.available = availableQuests
             savedGossipQuests.active = activeQuests
             savedGossipQuests.text = gossipText
@@ -382,12 +382,12 @@ function DGossipFrame_ShowGossipWindow(availableQuests, activeQuests, gossipOpti
     
     HideDefaultFrames()
 
-    -- Показываем DGossipFrame и все его дочерние элементы
+    -- Show DGossipFrame and all its child elements
     if not DGossipFrame:IsVisible() then
         ShowUIPanel(DGossipFrame)
     end
     
-    -- Принудительно показываем все необходимые фреймы
+    -- Force-show all required frames
     if DGossipFrameGreetingPanel then
         DGossipFrameGreetingPanel:Show()
     end
@@ -400,7 +400,7 @@ function DGossipFrame_ShowGossipWindow(availableQuests, activeQuests, gossipOpti
         DGossipGreetingScrollChildFrame:Show()
     end
 
-    -- Обновляем содержимое
+    -- Update content
     DGossipFrameUpdate(availableQuests, activeQuests, gossipOptions)
 
     if DialogUI_ApplyAlpha then
@@ -424,7 +424,7 @@ function DGossipFrameUpdate(availableQuests, activeQuests, gossipOptions)
     DebugMsg(string.format("DEBUG: DGossipFrameUpdate - avail=%d, active=%d, options=%d", 
         availCount, activeCount, optionsCount))
     
-    -- Очищаем кнопки
+    -- Clear buttons
     for i = 1, NUMGOSSIPBUTTONS do
         local button = getglobal("DGossipTitleButton" .. i)
         if button then
@@ -433,19 +433,19 @@ function DGossipFrameUpdate(availableQuests, activeQuests, gossipOptions)
             button.type = nil
             button.isGossip = nil
             
-            -- ИСПРАВЛЕНО: Находим иконку и явно показываем её
+            -- Find the icon and explicitly show it
             local icon = _G[button:GetName() .. "QuestIcon"]
             if icon then
                 icon:SetTexture(nil)
-                icon:Hide()  -- Скрываем до установки текстуры
-                icon:Show()  -- Показываем после очистки
+                icon:Hide()  -- Hide before setting texture
+                icon:Show()  -- Show after clearing
             end
         end
     end
     
     DGossipFrame.buttonIndex = 1
     
-    -- Обновляем данные
+    -- Update data
     local greetingText = getglobal("DGossipGreetingText")
     if greetingText then
         greetingText:SetText(GetGossipText() or "")
@@ -460,18 +460,18 @@ function DGossipFrameUpdate(availableQuests, activeQuests, gossipOptions)
         SetPortraitTexture(DGossipFramePortrait, "npc")
     end
     
-    -- ИСПРАВЛЕНО: Показываем и квесты, и опции!
-    -- Сначала активные квесты
+    -- Show both quests and options!
+    -- First active quests
     if activeCount > 0 then
         DGossipFrameActiveQuestsUpdate(activeQuests);
     end
     
-    -- Потом доступные квесты
+    -- Then available quests
     if availCount > 0 then
         DGossipFrameAvailableQuestsUpdate(availableQuests);
     end
     
-    -- Потом опции
+    -- Then options
     if optionsCount > 0 then
         DGossipFrameOptionsUpdate(gossipOptions);
     end
@@ -480,7 +480,7 @@ function DGossipFrameUpdate(availableQuests, activeQuests, gossipOptions)
         DGossipFrameGreetingPanel:Show()
     end
     
-    -- Обновляем скролл
+    -- Update scroll
     local scrollFrame = getglobal("DGossipGreetingScrollFrame")
     if scrollFrame then
         scrollFrame:UpdateScrollChildRect()
@@ -517,11 +517,11 @@ function DGossipFrame_OnKeyDown()
 
     if key == "ESCAPE" then
         CloseGossip()
-        DialogUI_SavePosition()  -- Сохраняем позицию!
+        DialogUI_SavePosition()  -- Save position!
         return
     end
 
-    -- ИСПРАВЛЕНО: SPACE выбирает первую доступную опцию (квест или gossip)
+    -- SPACE selects the first available option (quest or gossip)
     if key == "SPACE" then
         DGossipSelectFirstAvailable()
         return
@@ -551,7 +551,7 @@ function DGossipSelectFirstAvailable()
         return
     end
 
-    -- Ищем первую видимую кнопку
+    -- Find the first visible button
     for i = 1, NUMGOSSIPBUTTONS do
         local titleButton = getglobal("DGossipTitleButton" .. i)
         if titleButton and titleButton:IsVisible() and titleButton:GetText() and titleButton:GetText() ~= "" then
@@ -606,13 +606,13 @@ function DGossipTitleButton_OnClick_Direct(button)
     DebugMsg(string.format("DEBUG: DGossipTitleButton_OnClick_Direct - type=%s, ID=%d, isGossip=%s, specialType=%s", 
         tostring(buttonType), buttonID, tostring(isGossip), tostring(button.specialType)));
 
-    -- Обработка кнопки "Пока"
+    -- Handle the "Goodbye" button
     if button.specialType == "goodbye" then
         CloseGossip();
         return;
     end
 
-    -- ИСПРАВЛЕНО: Для gossip-квестов (isGossip=true) используем SelectGossip*
+    -- For gossip quests (isGossip=true) use SelectGossip*
     if isGossip then
         if buttonType == "available" then
             DebugMsg(string.format("DEBUG: Selecting Gossip Available Quest %d", buttonID));
@@ -625,16 +625,16 @@ function DGossipTitleButton_OnClick_Direct(button)
         end
     end
 	
-	-- Проверка на открытие книги
-    if button.specialType == "book" or (button.text and string.find(string.lower(button.text), "читать")) then
-        -- Здесь можно добавить логику открытия книги
+	-- Check for book opening
+    if button.specialType == "book" or (button.text and string.find(string.lower(button.text), "read")) then
+        -- Book opening logic can be added here
         if DUIBookFrame then
             DUIBookFrame:ShowUI();
         end
         return;
     end
 
-    -- Для обычных gossip опций (не квесты)
+    -- For regular gossip options (not quests)
     if buttonType == "gossip" then
         DebugMsg(string.format("DEBUG: Selecting Gossip Option %d", buttonID));
         SelectGossipOption(buttonID);
@@ -649,16 +649,16 @@ function DGossipTitleButton_OnClick()
 end
 
 function GetValidIconPath(basePath)
-    -- Пробуем разные варианты путей и расширений
+    -- Try different path and extension variants
     local variations = {}
     
-    -- Сначала пробуем с двойными обратными слешами (Windows-style) - это работает в 3.3.5
+    -- First try with double backslashes (Windows-style) - this works in 3.3.5
     local winPath = string.gsub(basePath, "/", "\\")
     table.insert(variations, winPath .. ".blp")
     table.insert(variations, winPath .. ".tga")
     table.insert(variations, winPath)
     
-    -- Пробуем также с прямыми слешами
+    -- Also try with forward slashes
     table.insert(variations, basePath .. ".blp")
     table.insert(variations, basePath .. ".tga")
     table.insert(variations, basePath)
@@ -667,7 +667,7 @@ function GetValidIconPath(basePath)
         local tex = DGossipFrame:CreateTexture(nil, "ARTWORK")
         tex:SetTexture(path)
         if tex:GetTexture() then
-            tex:SetTexture(nil) -- очистка
+            tex:SetTexture(nil) -- clear
             return path
         end
         tex:SetTexture(nil)
@@ -683,7 +683,7 @@ function SetGossipButtonIcon(button, iconType, text)
     local gossipIcon = _G[iconName]
     
     if not gossipIcon then
-        -- Ищем через GetRegions
+        -- Search via GetRegions
         local regions = {button:GetRegions()}
         for _, region in ipairs(regions) do
             if region:GetObjectType() == "Texture" then
@@ -698,24 +698,24 @@ function SetGossipButtonIcon(button, iconType, text)
         return false
     end
     
-    -- Позиционирование
+    -- Positioning
     gossipIcon:ClearAllPoints()
     gossipIcon:SetWidth(24)
     gossipIcon:SetHeight(24)
     gossipIcon:SetPoint("LEFT", button, "LEFT", 5, 0)
     
-    -- Определяем базовый путь с ДВОЙНЫМИ ОБРАТНЫМИ СЛЕШАМИ
+    -- Determine the base path with DOUBLE BACKSLASHES
     local basePath = "Interface\\AddOns\\DialogUI\\src\\assets\\art\\icons\\"
     local iconFile = "gossipIcon" -- default
     
-    -- Расширенный маппинг типов
+    -- Extended type mapping
     local iconMap = {
-        -- Базовые
+        -- Basic
         ["goodbye"] = "gossipIcon",
         ["bye"] = "gossipIcon",
         ["gossip"] = "gossipIcon",
         
-        -- Специальные NPC
+        -- Special NPCs
         ["vendor"] = "vendorGossipIcon",
         ["trainer"] = "trainerGossipIcon",
         ["binder"] = "binderGossipIcon",
@@ -737,7 +737,7 @@ function SetGossipButtonIcon(button, iconType, text)
         ["classTrainer"] = "classTrainerGossipIcon",
         ["deeprunTram"] = "deeprunTramGossipIcon",
         
-        -- Классы
+        -- Classes
         ["warrior"] = "warriorGossipIcon",
         ["paladin"] = "paladinGossipIcon",
         ["hunter"] = "hunterGossipIcon",
@@ -749,7 +749,7 @@ function SetGossipButtonIcon(button, iconType, text)
         ["druid"] = "druidGossipIcon",
         ["deathKnight"] = "deathKnightGossipIcon",
         
-        -- Профессии
+        -- Professions
         ["alchemy"] = "alchemyGossipIcon",
         ["blacksmithing"] = "blacksmithingGossipIcon",
         ["enchanting"] = "enchantingGossipIcon",
@@ -772,13 +772,13 @@ function SetGossipButtonIcon(button, iconType, text)
         DebugMsg(string.format("WARNING: Unknown icon type '%s', using default", tostring(iconType)))
     end
     
-    -- Ищем валидный путь
+    -- Find a valid path
     local fullPath = basePath .. iconFile
     local validPath = GetValidIconPath(fullPath)
     
     if not validPath then
         DebugMsg(string.format("WARNING: Could not find icon file: %s (type: %s)", iconFile, tostring(iconType)))
-        -- Пробуем стандартную иконку
+        -- Try the standard icon
         validPath = GetValidIconPath(basePath .. "gossipIcon")
     end
     
@@ -824,7 +824,7 @@ function DGossipFrameOptionsUpdate(optionsTable)
         if (DGossipFrame.buttonIndex > NUMGOSSIPBUTTONS) then
             if not DGossipFrame.optionsLimitReached then
                 DGossipFrame.optionsLimitReached = true
-                DebugMsg("|cffff0000[DialogUI]|r Этот NPC имеет слишком много опций диалога. Отображаются только первые " .. NUMGOSSIPBUTTONS .. " опций.", 1, 0.5, 0)
+                DebugMsg("|cffff0000[DialogUI]|r This NPC has too many dialog options. Only the first " .. NUMGOSSIPBUTTONS .. " options are shown.", 1, 0.5, 0)
             end
             break
         end
@@ -832,13 +832,13 @@ function DGossipFrameOptionsUpdate(optionsTable)
         local titleButton = getglobal("DGossipTitleButton" .. DGossipFrame.buttonIndex)
         
         if not titleButton then
-            DebugMsg("|cffff0000[DialogUI]|r Ошибка: не удалось создать кнопку диалога #" .. DGossipFrame.buttonIndex, 1, 0, 0)
+            DebugMsg("|cffff0000[DialogUI]|r Error: failed to create dialog button #" .. DGossipFrame.buttonIndex, 1, 0, 0)
             break
         end
 
         local numberedText = DGossipFrame.buttonIndex .. ". " .. text
         
-        -- ИСПОЛЬЗУЕМ НОВУЮ ФУНКЦИЮ для gossip кнопок
+        -- Use the new function for gossip buttons
         DGossipTitleButton_SetGossipText(titleButton, numberedText)
 
         totalGossipButtons = totalGossipButtons + 1
@@ -852,13 +852,13 @@ function DGossipFrameOptionsUpdate(optionsTable)
             DGossipTitleButton_OnClick_Direct(this)
         end)
 
-        -- Определяем иконку по тексту
+        -- Determine icon by text
         local detectedIconType = DetermineGossipIconTypeByText(text)
         DebugMsg(string.format("Text: '%s' -> Detected type: '%s', API type: '%s'", text, detectedIconType, tostring(iconType)))
         
         SetGossipButtonIcon(titleButton, detectedIconType, text)
 
-        -- Устанавливаем фоновую текстуру
+        -- Set background texture
         titleButton:SetNormalTexture("Interface\\AddOns\\DialogUI\\src\\assets\\art\\parchment\\OptionBackground-common")
         local normalTexture = titleButton:GetNormalTexture()
         if normalTexture then
@@ -867,7 +867,7 @@ function DGossipFrameOptionsUpdate(optionsTable)
         
         titleButton:SetNormalFontObject("DQuestButtonTitleGossip")
         
-        -- Настраиваем текст кнопки
+        -- Configure button text
         local buttonText = titleButton:GetFontString()
         if buttonText then
             buttonText:ClearAllPoints()
@@ -877,7 +877,7 @@ function DGossipFrameOptionsUpdate(optionsTable)
 
         titleButton:Show()
         
-        -- Динамическое позиционирование
+        -- Dynamic positioning
         if DGossipFrame.buttonIndex > 1 then
             local prevButton = getglobal("DGossipTitleButton" .. (DGossipFrame.buttonIndex - 1))
             if prevButton then
@@ -892,29 +892,29 @@ function DGossipFrameOptionsUpdate(optionsTable)
     DebugMsg(string.format("DEBUG: OptionsUpdate finished - buttonIndex now %d", DGossipFrame.buttonIndex))
 end
 
--- Функция для установки текста gossip кнопки с автопереносом
+-- Function to set gossip button text with word wrap
 function DGossipTitleButton_SetGossipText(button, text)
     if not button then return end
     
     local fontString = button:GetFontString()
     if not fontString then return end
     
-    -- Устанавливаем текст с переносом
+    -- Set text with wrapping
     fontString:SetText(text)
     fontString:SetWordWrap(true)
-    fontString:SetWidth(360) -- Максимальная ширина текста
-    fontString:SetHeight(0) -- Авто-высота
+    fontString:SetWidth(360) -- Maximum text width
+    fontString:SetHeight(0) -- Auto height
     
-    -- Получаем реальные размеры
+    -- Get actual dimensions
     local textWidth = fontString:GetStringWidth()
     local textHeight = fontString:GetStringHeight()
     
-    -- Минимальная высота 24px, расширяем при необходимости
+    -- Minimum height 24px, expand as needed
     local newHeight = math.max(24, textHeight + 8)
     
     button:SetHeight(newHeight)
     
-    -- Обновляем фон если есть
+    -- Update background if present
     local bg = getglobal(button:GetName() .. "ProgressBackground")
     if bg then
         bg:SetWidth(math.min(textWidth + 45, 400))
@@ -922,14 +922,15 @@ function DGossipTitleButton_SetGossipText(button, text)
     end
 end
 
--- НОВАЯ ФУНКЦИЯ: Определение типа иконки по тексту опции (русская локализация)
+-- Function to determine icon type by option text (Russian localization)
 function DetermineGossipIconTypeByText(optionText)
     if not optionText then return "gossip" end
     
     local text = string.lower(optionText)
     
-    -- Учитель классовых навыков (Class Trainers)
+    -- Class trainers
     local classTrainers = {
+        -- Russian
         ["воин"] = "warrior",
         ["паладин"] = "paladin",
         ["охотник"] = "hunter",
@@ -940,6 +941,7 @@ function DetermineGossipIconTypeByText(optionText)
         ["чернокнижник"] = "warlock",
         ["друид"] = "druid",
         ["рыцарь смерти"] = "deathKnight",
+        -- English
         ["warrior"] = "warrior",
         ["paladin"] = "paladin",
         ["hunter"] = "hunter",
@@ -958,8 +960,9 @@ function DetermineGossipIconTypeByText(optionText)
         end
     end
     
-    -- Учитель профессий (Profession Trainers)
+    -- Profession trainers
     local professionTrainers = {
+        -- Russian
         ["алхимия"] = "alchemy",
         ["кузнечное дело"] = "blacksmithing",
         ["наложение чар"] = "enchanting",
@@ -974,6 +977,7 @@ function DetermineGossipIconTypeByText(optionText)
         ["кулинария"] = "cooking",
         ["рыбная ловля"] = "fishing",
         ["первая помощь"] = "firstAid",
+        -- English
         ["alchemy"] = "alchemy",
         ["blacksmithing"] = "blacksmithing",
         ["enchanting"] = "enchanting",
@@ -996,7 +1000,7 @@ function DetermineGossipIconTypeByText(optionText)
         end
     end
     
-    -- Специальные NPC
+    -- Special NPCs
     if string.find(text, "банк") or string.find(text, "bank") then
         return "banker"
     elseif string.find(text, "таверна") or string.find(text, "inn") or string.find(text, "трактирщик") or string.find(text, "innkeeper") then
@@ -1006,7 +1010,7 @@ function DetermineGossipIconTypeByText(optionText)
     elseif string.find(text, "регистратор гильдий") or string.find(text, "гильдия") or string.find(text, "guild") or string.find(text, "tabard") then
         return "guildMaster"
     elseif string.find(text, "замочник") or string.find(text, "locksmith") then
-        return "gossip" -- нет специальной иконки
+        return "gossip" -- no special icon
     elseif string.find(text, "смотритель стойл") or string.find(text, "стойла") or string.find(text, "stable") then
         return "stablemaster"
     elseif string.find(text, "учитель оружейных навыков") or string.find(text, "оружейные навыки") or string.find(text, "weapon") then
@@ -1014,11 +1018,11 @@ function DetermineGossipIconTypeByText(optionText)
     elseif string.find(text, "военачальник") or string.find(text, "battlemaster") or string.find(text, "бой") then
         return "battlemaster"
     elseif string.find(text, "парикмахер") or string.find(text, "barber") then
-        return "barber" -- нет специальной иконки
+        return "barber" -- no special icon
     elseif string.find(text, "словарь силы") or string.find(text, "lexicon") then
-        return "gossip" -- нет специальной иконки
+        return "gossip" -- no special icon
     elseif string.find(text, "дом офицеров") or string.find(text, "officer") then
-        return "gossip" -- нет специальной иконки
+        return "gossip" -- no special icon
     elseif string.find(text, "аукцион") or string.find(text, "auction") then
         return "auctionHouse"
     elseif string.find(text, "торговец") or string.find(text, "vendor") or string.find(text, "продавец") then
@@ -1080,7 +1084,7 @@ function DGossipFrameAvailableQuestsUpdate(questsTable)
 
         local displayText = DGossipFrame.buttonIndex .. ". " .. questTitle
         
-        -- ИСПОЛЬЗУЕМ ФУНКЦИЮ С ПЕРЕНОСОМ
+        -- Use the wrap function
         DGossipTitleButton_SetGossipText(titleButton, displayText)
         
         titleButton:SetID(titleIndex);
@@ -1095,7 +1099,7 @@ function DGossipFrameAvailableQuestsUpdate(questsTable)
             DGossipTitleButton_OnClick_Direct(this)
         end)
 
-        -- Иконка
+        -- Icon
         local gossipIcon = _G[titleButton:GetName() .. "QuestIcon"]
         if not gossipIcon then
             local regions = {titleButton:GetRegions()}
@@ -1115,7 +1119,7 @@ function DGossipFrameAvailableQuestsUpdate(questsTable)
             gossipIcon:Show()
         end
 
-        -- Настройка кнопки
+        -- Button setup
         titleButton:SetNormalTexture("Interface/AddOns/DialogUI/src/assets/art/parchment/OptionBackground-common")
         
         local btnText = titleButton:GetFontString()
@@ -1126,7 +1130,7 @@ function DGossipFrameAvailableQuestsUpdate(questsTable)
 
         titleButton:Show()
         
-        -- Динамическое позиционирование
+        -- Dynamic positioning
         if DGossipFrame.buttonIndex > 1 then
             local prevButton = getglobal("DGossipTitleButton" .. (DGossipFrame.buttonIndex - 1))
             if prevButton then
@@ -1152,11 +1156,11 @@ function DGossipFrameActiveQuestsUpdate(questsTable)
     local quests = {}
     local i = 1
 
-    -- ИСПРАВЛЕНО: Последовательный парсинг с правильным определением isComplete
+    -- Sequential parsing with correct isComplete detection
     while i <= dataSize do
         local field = questsTable[i]
 
-        -- Ищем строку (title квеста)
+        -- Look for a string (quest title)
         if type(field) == "string" then
             local questTitle = field
             local questLevel = nil
@@ -1165,12 +1169,12 @@ function DGossipFrameActiveQuestsUpdate(questsTable)
 
             local nextIndex = i + 1
 
-            -- ИСПРАВЛЕНО: Пропускаем nil поля
+            -- Skip nil fields
             while nextIndex <= dataSize and questsTable[nextIndex] == nil do
                 nextIndex = nextIndex + 1
             end
 
-            -- Ищем level (число > 1)
+            -- Look for level (number > 1)
             if nextIndex <= dataSize and type(questsTable[nextIndex]) == "number" then
                 local val = questsTable[nextIndex]
                 if val > 1 or val < 0 then
@@ -1179,34 +1183,34 @@ function DGossipFrameActiveQuestsUpdate(questsTable)
                 end
             end
 
-            -- ИСПРАВЛЕНО: Пропускаем nil снова
+            -- Skip nil again
             while nextIndex <= dataSize and questsTable[nextIndex] == nil do
                 nextIndex = nextIndex + 1
             end
 
-            -- Ищем флаги isLowLevel и isComplete (0 или 1)
+            -- Look for isLowLevel and isComplete flags (0 or 1)
             local flagsFound = 0
             while nextIndex <= dataSize and flagsFound < 2 do
                 local val = questsTable[nextIndex]
                 if type(val) == "number" and (val == 0 or val == 1) then
                     if flagsFound == 0 then
-                        -- Первый флаг
+                        -- First flag
                         if nextIndex + 1 <= dataSize then
                             local nextVal = questsTable[nextIndex + 1]
                             if type(nextVal) == "number" and (nextVal == 0 or nextVal == 1) then
-                                -- Два флага: isLowLevel, isComplete
+                                -- Two flags: isLowLevel, isComplete
                                 isLowLevel = (val == 1)
                                 isComplete = (nextVal == 1)
                                 nextIndex = nextIndex + 2
                                 flagsFound = 2
                             else
-                                -- Один флаг: isComplete
+                                -- One flag: isComplete
                                 isComplete = (val == 1)
                                 nextIndex = nextIndex + 1
                                 flagsFound = 1
                             end
                         else
-                            -- Последний флаг: isComplete
+                            -- Last flag: isComplete
                             isComplete = (val == 1)
                             nextIndex = nextIndex + 1
                             flagsFound = 1
@@ -1215,7 +1219,7 @@ function DGossipFrameActiveQuestsUpdate(questsTable)
                 else
                     break
                 end
-                -- ИСПРАВЛЕНО: Выходим после обработки флагов
+                -- Exit after processing flags
                 break
             end
 
@@ -1267,7 +1271,7 @@ function DGossipFrameActiveQuestsUpdate(questsTable)
             DGossipTitleButton_OnClick_Direct(this)
         end)
 
-        -- Иконка
+        -- Icon
         local gossipIcon = _G[titleButton:GetName() .. "QuestIcon"]
         if not gossipIcon then
             local regions = {titleButton:GetRegions()}
@@ -1285,7 +1289,7 @@ function DGossipFrameActiveQuestsUpdate(questsTable)
             gossipIcon:SetHeight(24)
             gossipIcon:SetPoint("LEFT", titleButton, "LEFT", 5, 0)
 
-            -- ИСПРАВЛЕНО: Используем правильные пути с двойными обратными слешами
+            -- Use correct paths with double backslashes
             local iconPath
             if isComplete then
                 iconPath = "Interface\\AddOns\\DialogUI\\src\\assets\\art\\icons\\activeQuestIcon"
@@ -1295,10 +1299,10 @@ function DGossipFrameActiveQuestsUpdate(questsTable)
 
             gossipIcon:SetTexture(iconPath)
 
-            -- Проверяем загрузилась ли текстура
+            -- Check whether the texture loaded
             if not gossipIcon:GetTexture() then
                 DebugMsg(string.format("DEBUG: WARNING - Icon not loaded, trying forward slashes"))
-                -- Пробуем с прямыми слешами
+                -- Try with forward slashes
                 iconPath = string.gsub(iconPath, "\\\\", "/")
                 gossipIcon:SetTexture(iconPath)
                 DebugMsg(string.format("DEBUG: Forward slash path result: %s", tostring(gossipIcon:GetTexture() ~= nil)))
@@ -1311,7 +1315,7 @@ function DGossipFrameActiveQuestsUpdate(questsTable)
             DebugMsg(string.format("DEBUG: ERROR - No gossipIcon found for button %d", DGossipFrame.buttonIndex))
         end
 
-        -- Настройка кнопки
+        -- Button setup
         titleButton:SetNormalTexture("Interface\\AddOns\\DialogUI\\src\\assets\\art\\parchment\\OptionBackground-common")
 
         local btnText = titleButton:GetFontString()
@@ -1322,7 +1326,7 @@ function DGossipFrameActiveQuestsUpdate(questsTable)
 
         titleButton:Show()
 
-        -- Динамическое позиционирование
+        -- Dynamic positioning
         if DGossipFrame.buttonIndex > 1 then
             local prevButton = getglobal("DGossipTitleButton" .. (DGossipFrame.buttonIndex - 1))
             if prevButton then
@@ -1335,11 +1339,11 @@ function DGossipFrameActiveQuestsUpdate(questsTable)
     end
 end
 
--- ИСПРАВЛЕНО: Функция определения типа иконки как в Storyline
+-- Function to determine icon type like Storyline
 function DetermineGossipIconType(gossipText)
     local text = string.lower(gossipText)
     
-    -- Профессии
+    -- Professions
     local professions = {
         "alchemy", "blacksmithing", "enchanting", "engineering", 
         "herbalism", "leatherworking", "mining", "skinning", 
@@ -1352,7 +1356,7 @@ function DetermineGossipIconType(gossipText)
         end
     end
     
-    -- Классы
+    -- Classes
     local classes = {
         "warrior", "paladin", "hunter", "rogue", "priest", 
         "shaman", "mage", "warlock", "druid", "death knight"
@@ -1364,7 +1368,7 @@ function DetermineGossipIconType(gossipText)
         end
     end
     
-    -- Специальные случаи
+    -- Special cases
     if string.find(text, "profession") and string.find(text, "trainer") then
         return "professionTrainer"
     elseif string.find(text, "class") and string.find(text, "trainer") then
@@ -1399,9 +1403,9 @@ function DetermineGossipIconType(gossipText)
 end
 
 function DialogUI_GetGossipIconPath(iconType, gossipText)
-    -- Маппинг для различных типов
+    -- Mapping for various types
     local iconMap = {
-        -- Профессии
+        -- Professions
         ["alchemy"] = "alchemyGossipIcon",
         ["blacksmithing"] = "blacksmithingGossipIcon",
         ["enchanting"] = "enchantingGossipIcon",
@@ -1418,7 +1422,7 @@ function DialogUI_GetGossipIconPath(iconType, gossipText)
         ["firstaid"] = "first aidGossipIcon",
         ["firstAid"] = "first aidGossipIcon",
         
-        -- Классы
+        -- Classes
         ["warrior"] = "warriorGossipIcon",
         ["paladin"] = "paladinGossipIcon",
         ["hunter"] = "hunterGossipIcon",
@@ -1431,7 +1435,7 @@ function DialogUI_GetGossipIconPath(iconType, gossipText)
         ["death knight"] = "deathKnightGossipIcon",
         ["deathKnight"] = "deathKnightGossipIcon",
         
-        -- Специальные
+        -- Special
         ["professionTrainer"] = "professionTrainerGossipIcon",
         ["classTrainer"] = "classTrainerGossipIcon",
         ["stablemaster"] = "stablemasterGossipIcon",
@@ -1452,7 +1456,7 @@ function DialogUI_GetGossipIconPath(iconType, gossipText)
     local basePath = "Interface\\AddOns\\DialogUI\\src\\assets\\art\\icons\\"
     local fullPath = basePath .. iconFile
     
-    -- Используем GetValidIconPath для проверки
+    -- Use GetValidIconPath for validation
     local validPath = GetValidIconPath(fullPath)
 	
 	if iconType == "barber" then
@@ -1462,7 +1466,7 @@ function DialogUI_GetGossipIconPath(iconType, gossipText)
     if validPath then
         return validPath
     else
-        -- Fallback на стандартную иконку
+        -- Fallback to standard icon
         return GetValidIconPath(basePath .. "gossipIcon") or "Interface\\AddOns\\DialogUI\\src\\assets\\art\\icons\\gossipIcon"
     end
 end
@@ -1471,14 +1475,14 @@ function ClearAllGossipIcons()
     for i = 1, NUMGOSSIPBUTTONS do
         local titleButton = getglobal("DGossipTitleButton" .. i)
         if titleButton then
-            -- Пытаемся найти иконку по имени из XML
+            -- Try to find the icon by name from XML
             local gossipIcon = _G[titleButton:GetName() .. "QuestIcon"]
             if gossipIcon then
                 gossipIcon:Hide()
                 gossipIcon:SetTexture(nil)
             end
             
-            -- Также проверяем возможные созданные иконки (для опций)
+            -- Also check possible created icons (for options)
             local customIcon = _G[titleButton:GetName() .. "GossipIcon"]
             if customIcon then
                 customIcon:Hide()
@@ -1531,30 +1535,30 @@ function CreateGossipButtons()
         local button = _G[buttonName]
         
         if not button then
-            -- Создаем новую кнопку
+            -- Create a new button
             button = CreateFrame("Button", buttonName, parent, "DQuestTitleButtonTemplate")
             
-            -- Устанавливаем позицию относительно предыдущей кнопки
+            -- Position relative to the previous button
             if prevButton then
                 button:SetPoint("TOPLEFT", prevButton, "BOTTOMLEFT", 0, -10)
             end
             
-            -- Настраиваем размеры и текст
+            -- Set dimensions and text
             button:SetHeight(24)
             button:SetWidth(400)
             
-            -- ИСПРАВЛЕНО: Не создаем иконку, она уже есть в шаблоне DQuestTitleButtonTemplate
-            -- Просто находим существующую иконку и настраиваем её
+            -- Don't create an icon; it already exists in the DQuestTitleButtonTemplate
+            -- Just find the existing icon and configure it
             local icon = _G[buttonName .. "QuestIcon"]
             if icon then
                 icon:SetWidth(24)
                 icon:SetHeight(24)
                 icon:SetPoint("LEFT", button, "LEFT", 5, 0)
-                icon:SetTexture(nil) -- Очищаем текстуру по умолчанию
-                icon:Hide() -- Скрываем до установки конкретной текстуры
+                icon:SetTexture(nil) -- Clear the default texture
+                icon:Hide() -- Hide until a specific texture is set
             end
             
-            -- Настраиваем текст кнопки
+            -- Configure button text
             local text = button:GetFontString()
             if text then
                 text:ClearAllPoints()
@@ -1590,7 +1594,7 @@ function DebugIconTextures()
     for i = 1, NUMGOSSIPBUTTONS do
         local button = getglobal("DGossipTitleButton" .. i)
         if button then
-            -- Проверяем, видима ли кнопка
+            -- Check whether the button is visible
             if button:IsVisible() then
                 local icon = _G[button:GetName() .. "QuestIcon"]
                 
@@ -1632,7 +1636,7 @@ function DebugIconTextures()
                         tostring(a or 0)
                     ))
                     
-                    -- Проверяем, не перекрыта ли иконка другими текстурами
+                    -- Check whether the icon is covered by other textures
                     local regions = {button:GetRegions()}
                     DebugMsg(string.format("  Button has %d regions:", #regions))
                     for idx, region in ipairs(regions) do
@@ -1666,14 +1670,14 @@ function DebugIconTextures()
     DebugMsg("=== END DEBUG ===")
 end
 
--- Добавьте команду для вызова
+-- Add command to invoke
 SlashCmdList["DEBUG_ICONS"] = DebugIconTextures
 SLASH_DEBUG_ICONS1 = "/debugicons"
 
 function ShowAllGossipButtons()
     DebugMsg("=== SHOWING ALL GOSSIP BUTTONS ===")
     
-    -- Показываем родительские фреймы
+    -- Show parent frames
     if DGossipFrame then
         DGossipFrame:Show()
     end
@@ -1690,14 +1694,14 @@ function ShowAllGossipButtons()
         DGossipGreetingScrollChildFrame:Show()
     end
     
-    -- Показываем все кнопки
+    -- Show all buttons
     for i = 1, NUMGOSSIPBUTTONS do
         local button = getglobal("DGossipTitleButton" .. i)
         if button then
             button:Show()
             DebugMsg("Showed button " .. i)
             
-            -- Показываем иконку
+            -- Show icon
             local icon = _G[button:GetName() .. "QuestIcon"]
             if icon then
                 icon:Show()
