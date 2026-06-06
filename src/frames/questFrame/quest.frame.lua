@@ -19,14 +19,14 @@ QUESTINFO_FADE_IN = 1;
 
 UIPanelWindows["DQuestFrame"] = { area = "left", pushable = 0 };
 
--- Инициализация кастомного тултипа если он еще не создан
+-- Initialize custom tooltip if not yet created
 if not DialogueUITooltip then
-    -- Создаем тултип если tooltip.custom.lua не загрузился
+    -- Create tooltip if tooltip.custom.lua didn't load
     local tooltip = CreateFrame("GameTooltip", "DialogueUITooltip", UIParent, "GameTooltipTemplate")
     tooltip:SetFrameStrata("TOOLTIP")
     tooltip:SetClampedToScreen(true)
     
-    -- Убираем стандартный фон
+    -- Remove the standard background
     for i = 1, tooltip:GetNumRegions() do
         local region = select(i, tooltip:GetRegions())
         if region:GetObjectType() == "Texture" then
@@ -39,7 +39,7 @@ if not DialogueUITooltip then
         end
     end
     
-    -- Устанавливаем кастомный фон
+    -- Set custom background
     local bg = tooltip:CreateTexture(nil, "BACKGROUND")
     bg:SetAllPoints()
     bg:SetTexture("Interface\\AddOns\\DialogUI\\src\\assets\\art\\parchment\\TooltipBackground-Temp")
@@ -57,7 +57,7 @@ if not DialogUI_Config then
         scale = 1.0,
         alpha = 1.0,
         fontSize = 1.0,
-        hideTrivialQuests = false, -- ИСПРАВЛЕНО: Новая опция
+        hideTrivialQuests = false, -- New option
     };
 end
 
@@ -68,7 +68,7 @@ local COLORS = {
 };
 
 -- ==========================================
--- Функции проверки возможности использования предметов
+-- Item usability check functions
 -- ==========================================
 
 function DQuestFrame_CanUseItem(itemLink)
@@ -85,9 +85,9 @@ function DQuestFrame_CanUseItem(itemLink)
     local canUse = true
     local reason = nil
     
-    -- Проверяем ВСЕ строки тултипа (и левые, и правые)
+    -- Check ALL tooltip lines (both left and right)
     for i = 1, tooltip:NumLines() do
-        -- Проверяем ЛЕВУЮ сторону
+        -- Check the LEFT side
         local leftText = getglobal(tooltip:GetName() .. "TextLeft" .. i)
         if leftText and leftText:IsShown() then
             local text = leftText:GetText() or ""
@@ -95,7 +95,7 @@ function DQuestFrame_CanUseItem(itemLink)
             
             DebugMsg(string.format("DEBUG Left %d: [%s] RGB(%.2f,%.2f,%.2f)", i, text, r, g, b))
             
-            -- Красный текст в левой части (требования класса, уровня)
+            -- Red text on the left side (class, level requirements)
             if r > 0.8 and g < 0.4 and b < 0.4 and i > 1 then
                 canUse = false
                 reason = "class"
@@ -103,7 +103,7 @@ function DQuestFrame_CanUseItem(itemLink)
             end
         end
         
-        -- Проверяем ПРАВУЮ сторону (там тип брони!)
+        -- Check the RIGHT side (armor type is there!)
         local rightText = getglobal(tooltip:GetName() .. "TextRight" .. i)
         if rightText and rightText:IsShown() then
             local text = rightText:GetText() or ""
@@ -111,8 +111,8 @@ function DQuestFrame_CanUseItem(itemLink)
             
             DebugMsg(string.format("DEBUG Right %d: [%s] RGB(%.2f,%.2f,%.2f)", i, text, r, g, b))
             
-            -- Тип брони обычно в правой части (Кожа, Кольчуга, Латы)
-            -- Если он красный — значит класс не может носить
+            -- Armor type is usually on the right side (Leather, Mail, Plate)
+            -- If it is red, the class cannot wear it
             if r > 0.8 and g < 0.4 and b < 0.4 then
                 canUse = false
                 reason = "armor_type"
@@ -134,7 +134,7 @@ function DQuestFrame_GetCurrencyOverflowIcon(parent)
         icon:SetTexture("Interface\\AddOns\\DialogUI\\src\\assets\\art\\icons\\CurrencyOverflow")
         icon:SetWidth(30)
         icon:SetHeight(30)
-        -- ИСПРАВЛЕНО: Привязываем к центру иконки предмета, а не к краю фрейма
+        -- Anchor to the center of the item icon, not to the edge of the frame
         icon:SetPoint("TOPRIGHT", parent, "TOPRIGHT", 40, 10)
         icon:Hide()
     end
@@ -146,7 +146,7 @@ function DQuestFrame_UpdateItemUsability(questItem, itemType, itemIndex)
     local icon = DQuestFrame_GetCurrencyOverflowIcon(questItem)
     local itemLink = GetQuestItemLink(itemType, itemIndex)
     
-    -- Дебаг информация
+    -- Debug info
     DebugMsg(string.format("DEBUG: Updating item %d, type=%s, link=%s", 
         itemIndex, tostring(itemType), tostring(itemLink or "nil")))
     
@@ -162,7 +162,7 @@ function DQuestFrame_UpdateItemUsability(questItem, itemType, itemIndex)
             icon:Show()
             questItem.cannotUseReason = reason
             
-            -- Проверяем что иконка действительно показалась
+            -- Verify that the icon actually appeared
             DebugMsg(string.format("DEBUG: Icon visibility after Show: %s, parent: %s", 
                 tostring(icon:IsVisible()), tostring(questItem:GetName())))
         else
@@ -180,7 +180,7 @@ end
 function DQuestFrame_DebugCheckAllItems()
     DebugMsg("=== DEBUG: Checking all quest items ===")
     
-    -- Проверяем предметы прогресса
+    -- Check progress items
     local numRequiredItems = GetNumQuestItems()
     DebugMsg(string.format("Progress items count: %d", numRequiredItems))
     
@@ -194,7 +194,7 @@ function DQuestFrame_DebugCheckAllItems()
         end
     end
     
-    -- Проверяем предметы наград (выбор)
+    -- Check reward items (choice)
     local numChoices = GetNumQuestChoices()
     DebugMsg(string.format("Choice items count: %d", numChoices))
     
@@ -208,7 +208,7 @@ function DQuestFrame_DebugCheckAllItems()
         end
     end
     
-    -- Проверяем фиксированные награды
+    -- Check fixed rewards
     local numRewards = GetNumQuestRewards()
     DebugMsg(string.format("Reward items count: %d", numRewards))
     
@@ -225,14 +225,14 @@ function DQuestFrame_DebugCheckAllItems()
     DebugMsg("=== End debug check ===")
 end
 
--- Добавляем слэш-команду для вызова
+-- Add slash command to invoke
 SLASH_DEBUGITEMS1 = "/debugitems"
 SlashCmdList["DEBUGITEMS"] = function()
     DQuestFrame_DebugCheckAllItems()
 end
 
 -- ==========================================
--- Обработчики событий для предметов квеста
+-- Quest item event handlers
 -- ==========================================
 
 function DQuestItem_OnEnter()
@@ -247,16 +247,16 @@ function DQuestItem_OnEnter()
         if (this.rewardType == "item") then
             tooltip:SetQuestItem(this.type, this:GetID())
             
-            -- Добавляем причину невозможности использования
+            -- Add reason for inability to use item
             if this.cannotUseReason then
                 tooltip:AddLine(" ")
-                local reasonText = "|cffff0000Вы не можете использовать этот предмет|r"
+                local reasonText = "|cffff0000You cannot use this item|r"
                 if this.cannotUseReason == "class" then
-                    reasonText = "|cffff0000Требуется другой класс|r"
+                    reasonText = "|cffff0000Wrong class required|r"
                 elseif this.cannotUseReason == "skill" then
-                    reasonText = "|cffff0000Необходимо изучить навык|r"
+                    reasonText = "|cffff0000Skill required|r"
                 elseif this.cannotUseReason == "level" then
-                    reasonText = "|cffff0000Недостаточный уровень|r"
+                    reasonText = "|cffff0000Level too low|r"
                 end
                 tooltip:AddLine(reasonText)
                 tooltip:Show()
@@ -279,7 +279,7 @@ function DQuestItem_OnLeave()
     ResetCursor()
 end
 
--- ИСПРАВЛЕНО: Константы из Storyline
+-- Constants from Storyline
 local GOSSIP_AVAILABLE_FIELDS = 5;
 local GOSSIP_ACTIVE_FIELDS = 4;
 
@@ -551,46 +551,46 @@ function DQuestFrame_OnEvent(event)
     end
     
     if (event == "QUEST_FINISHED") then
-		HideUIPanel(DQuestFrame);
-		DQuestFrame_GossipData = nil  -- Очищаем данные
-		return;
-	end
+        HideUIPanel(DQuestFrame);
+        DQuestFrame_GossipData = nil  -- Clear data
+        return;
+    end
     
     if ((event == "QUEST_ITEM_UPDATE") and not DQuestFrame:IsVisible()) then
         return;
     end
 
-    -- ИСПРАВЛЕНО: Приоритетная обработка QUEST_GREETING
+    -- Priority handling of QUEST_GREETING
     if (event == "QUEST_GREETING") then
         DebugMsg("DEBUG: QUEST_GREETING received in DQuestFrame");
 		
-		DQuestFrame:EnableKeyboard(false);
+        DQuestFrame:EnableKeyboard(false);
         
-        -- Принудительно скрываем GossipFrame если он видим
+        -- Force-hide GossipFrame if visible
         if GossipFrame and GossipFrame:IsVisible() then
             GossipFrame:Hide();
         end
         
-        -- Скрываем DGossipFrame если он видим
+        -- Hide DGossipFrame if visible
         if DGossipFrame and DGossipFrame:IsVisible() then
             HideUIPanel(DGossipFrame);
             DGossipFrame:Hide();
         end
         
-        -- Скрываем все стандартные фреймы
+        -- Hide all standard frames
         HideDefaultFrames();
         DialogUI_EnsureOriginalQuestHidden();
         
-        -- Показываем DQuestFrame
+        -- Show DQuestFrame
         ShowUIPanel(DQuestFrame);
         
-        -- Скрываем все панели кроме приветственной
+        -- Hide all panels except the greeting panel
         DQuestFrameRewardPanel:Hide();
         DQuestFrameProgressPanel:Hide();
         DQuestFrameDetailPanel:Hide();
         DQuestFrameGreetingPanel:Show();
         
-        -- Обновляем портрет если есть NPC
+        -- Update portrait if NPC exists
         if UnitExists("npc") then
             DQuestFrame_SetPortrait();
         end
@@ -602,7 +602,7 @@ function DQuestFrame_OnEvent(event)
         return;
     end
     
-    -- Для остальных событий проверяем видимость NPC
+    -- For other events check NPC visibility
     local wasVisible = DQuestFrame:IsVisible();
     
     HideDefaultFrames();
@@ -614,7 +614,7 @@ function DQuestFrame_OnEvent(event)
     
     if not wasVisible then
         ShowUIPanel(DQuestFrame);
-		DQuestFrame:EnableKeyboard(true);
+        DQuestFrame:EnableKeyboard(true);
     end
     
     if (not DQuestFrame:IsVisible()) then
@@ -793,7 +793,7 @@ function DQuestItem_OnClick()
 end
 
 function DQuestRewardItem_OnClick()
-    -- Проверяем модификаторы клавиш (как в обычной DQuestItem_OnClick)
+    -- Check key modifiers (same as standard DQuestItem_OnClick)
     if (IsControlKeyDown()) then
         if (this.rewardType ~= "spell") then
             DressUpItemLink(GetQuestItemLink(this.type, this:GetID()));
@@ -802,14 +802,14 @@ function DQuestRewardItem_OnClick()
         if (ChatFrameEditBox:IsVisible() and this.rewardType ~= "spell") then
             ChatFrameEditBox:Insert(GetQuestItemLink(this.type, this:GetID()));
         end
-    -- Добавляем логику выбора награды для панели наград
+    -- Add reward selection logic for the reward panel
     elseif (this.type == "choice") then
-        -- Подсвечиваем выбранную награду
+        -- Highlight the selected reward
         if DQuestRewardItemHighlight then
             DQuestRewardItemHighlight:SetPoint("TOPLEFT", this, "TOPLEFT", -2, 5);
             DQuestRewardItemHighlight:Show();
         end
-        -- Сохраняем ID выбранной награды
+        -- Save the selected reward ID
         if DQuestFrameRewardPanel then
             DQuestFrameRewardPanel.itemChoice = this:GetID();
         end
@@ -824,16 +824,16 @@ function DQuestItem_OnEnter()
             if (this.rewardType == "item") then
                 tooltip:SetQuestItem(this.type, this:GetID())
                 
-                -- Добавляем причину невозможности использования
+                -- Add reason for inability to use item
                 if this.cannotUseReason then
                     tooltip:AddLine(" ")
-                    local reasonText = "|cffff0000Вы не можете использовать этот предмет|r"
+                    local reasonText = "|cffff0000You cannot use this item|r"
                     if this.cannotUseReason == "class" then
-                        reasonText = "|cffff0000Требуется другой класс|r"
+                        reasonText = "|cffff0000Wrong class required|r"
                     elseif this.cannotUseReason == "skill" then
-                        reasonText = "|cffff0000Необходимо изучить навык|r"
+                        reasonText = "|cffff0000Skill required|r"
                     elseif this.cannotUseReason == "level" then
-                        reasonText = "|cffff0000Недостаточный уровень|r"
+                        reasonText = "|cffff0000Level too low|r"
                     end
                     tooltip:AddLine(reasonText)
                 end
@@ -849,13 +849,13 @@ function DQuestItem_OnEnter()
                 GameTooltip:SetQuestItem(this.type, this:GetID())
                 if this.cannotUseReason then
                     GameTooltip:AddLine(" ")
-                    local reasonText = "|cffff0000Вы не можете использовать этот предмет|r"
+                    local reasonText = "|cffff0000You cannot use this item|r"
                     if this.cannotUseReason == "class" then
-                        reasonText = "|cffff0000Требуется другой класс|r"
+                        reasonText = "|cffff0000Wrong class required|r"
                     elseif this.cannotUseReason == "skill" then
-                        reasonText = "|cffff0000Необходимо изучить навык|r"
+                        reasonText = "|cffff0000Skill required|r"
                     elseif this.cannotUseReason == "level" then
-                        reasonText = "|cffff0000Недостаточный уровень|r"
+                        reasonText = "|cffff0000Level too low|r"
                     end
                     GameTooltip:AddLine(reasonText)
                 end
@@ -923,14 +923,14 @@ function DQuestFrameProgressItems_Update()
             DQuestProgressRequiredMoneyText:Show();
             DQuestProgressRequiredMoneyFrame:Show();
 
-            -- Первый предмет под деньгами
+            -- First item below the money
             getglobal(questItemName .. 1):SetPoint("TOPLEFT", "DQuestProgressRequiredMoneyText", "BOTTOMLEFT", 0, -10);
         else
             DQuestProgressRequiredMoneyText:Hide();
             DQuestProgressRequiredMoneyFrame:Hide();
 
-            -- Первый предмет под заголовком
-            -- ИЗМЕНЯЙ ЗДЕСЬ: x = горизонтальный сдвиг, y = вертикальный отступ от заголовка
+            -- First item below the header
+            -- EDIT HERE: x = horizontal offset, y = vertical offset from header
             getglobal(questItemName .. 1):SetPoint("TOPLEFT", "DQuestProgressRequiredItemsText", "BOTTOMLEFT", -3, -25);
         end
 
@@ -941,7 +941,7 @@ function DQuestFrameProgressItems_Update()
             SetItemButtonCount(requiredItem, numItems);
             SetItemButtonTexture(requiredItem, texture);
             requiredItem:Show();
-			DQuestFrame_UpdateItemUsability(requiredItem, requiredItem.type, i); 
+            DQuestFrame_UpdateItemUsability(requiredItem, requiredItem.type, i); 
             getglobal(questItemName .. i .. "Name"):SetText(name);
             
             local itemNameText = getglobal(questItemName .. i .. "Name");
@@ -949,15 +949,15 @@ function DQuestFrameProgressItems_Update()
                 itemNameText:SetTextColor(1.0, 1.0, 1.0);
             end
             
-            -- ИЗМЕНЯЙ ЗДЕСЬ: позиционирование предметов 2-6
+            -- EDIT HERE: positioning for items 2-6
             if (i > 1) then
                 if (mod(i, 2) == 1) then
-                    -- Нечетные индексы (3, 5) - новая строка под предыдущей
-                    -- ИЗМЕНЯЙ: последнее число - отступ между строками (сейчас -10)
+                    -- Odd indices (3, 5) - new row below the previous
+                    -- EDIT: last number is the spacing between rows (currently -10)
                     requiredItem:SetPoint("TOPLEFT", questItemName .. (i - 2), "BOTTOMLEFT", 0, -10);
                 else
-                    -- Четные индексы (2, 4, 6) - справа от предыдущего
-                    -- ИЗМЕНЯЙ: третье число - отступ между предметами в строке (сейчас 10)
+                    -- Even indices (2, 4, 6) - to the right of the previous
+                    -- EDIT: third number is the spacing between items in a row (currently 10)
                     requiredItem:SetPoint("LEFT", questItemName .. (i - 1), "RIGHT", 50, 0);
                 end
             end
@@ -1031,8 +1031,8 @@ function DQuestFrameGreetingPanel_OnShow()
             end
         end
     else
-        numActiveQuests = GetNumActiveQuests();      -- Уже взятые задания
-        numAvailableQuests = GetNumAvailableQuests(); -- Задания, которые можно взять
+        numActiveQuests = GetNumActiveQuests();      -- Already accepted quests
+        numAvailableQuests = GetNumAvailableQuests(); -- Quests available to take
         
         if numActiveQuests == 0 and numAvailableQuests == 0 then
             gossipActiveQuests = {GetGossipActiveQuests()};
@@ -1079,16 +1079,16 @@ function DQuestFrameGreetingPanel_OnShow()
     
     SetFontColor(DGreetingText, "DarkBrown");
     
-    -- Скрываем текстовые заголовки
+    -- Hide text headers
     DCurrentQuestsText:Hide();
     DAvailableQuestsText:Hide();
     DQuestGreetingFrameHorizontalBreak:Hide();
 
     local buttonIndex = 1;
 
-    -- Сначала показываем АКТИВНЫЕ задания (уже взятые)
+    -- First show ACTIVE quests (already accepted)
     if (numActiveQuests > 0) then
-        -- Привязываем первую кнопку к тексту приветствия
+        -- Anchor the first button to the greeting text
         local greetingText = DGreetingText:GetText() or "";
         if greetingText ~= "" then
             DQuestTitleButton1:SetPoint("TOPLEFT", "DGreetingText", "BOTTOMLEFT", -10, -15);
@@ -1103,31 +1103,31 @@ function DQuestFrameGreetingPanel_OnShow()
             local questTitle, isComplete, isDaily;
             
             if table.getn(gossipActiveQuests) > 0 then
-                -- Gossip API 3.3.5: проверяем структуру данных
+                -- Gossip API 3.3.5: check data structure
                 local totalFields = table.getn(gossipActiveQuests);
                 local activeFields = math.floor(totalFields / numActiveQuests);
                 
                 local baseIndex = (i - 1) * activeFields + 1;
                 questTitle = gossipActiveQuests[baseIndex];
                 
-                -- Пробуем разные индексы для isComplete
+                -- Try different indices for isComplete
                 if activeFields >= 4 then
-                    isComplete = gossipActiveQuests[baseIndex + 3]; -- 4-е поле
+                    isComplete = gossipActiveQuests[baseIndex + 3]; -- 4th field
                 else
                     isComplete = false;
                 end
                 
-                -- Проверяем isDaily если есть
+                -- Check isDaily if present
                 isDaily = false;
                 if activeFields >= 5 then
-                    isDaily = gossipActiveQuests[baseIndex + 4]; -- 5-е поле
+                    isDaily = gossipActiveQuests[baseIndex + 4]; -- 5th field
                 end
             else
-                -- Стандартные QUEST_GREETING квесты
+                -- Standard QUEST_GREETING quests
                 questTitle = GetActiveTitle(i);
                 isDaily = false;
                 
-                -- Проверяем завершённость через objective'ы квеста
+                -- Check completion via quest objectives
                 isComplete = false;
                 local numEntries = GetNumQuestLogEntries();
                 
@@ -1135,14 +1135,14 @@ function DQuestFrameGreetingPanel_OnShow()
                     local qTitle, qLevel, qTag, qGroup, qPlayer, qComplete = GetQuestLogTitle(q);
                     
                     if qTitle and qTitle == questTitle then
-                        -- Проверка через objective'ы квеста
+                        -- Check via quest objectives
                         local numObjectives = GetNumQuestLeaderBoards(q);
                         
                         if numObjectives == 0 then
-                            -- Нет objective'ов - квест выполнен
+                            -- No objectives - quest is complete
                             isComplete = true;
                         else
-                            -- Проверяем все objective'ы
+                            -- Check all objectives
                             local allFinished = true;
                             for obj = 1, numObjectives do
                                 local text, type, finished = GetQuestLogLeaderBoard(obj, q);
@@ -1168,7 +1168,7 @@ function DQuestFrameGreetingPanel_OnShow()
                 
                 DQuestTitleButton_SetText(questTitleButton, displayText, buttonIndex)
                 
-                -- Устанавливаем иконку для активного задания
+                -- Set icon for active quest
                 local iconTexture = getglobal(questTitleButton:GetName() .. "QuestIcon");
                 if iconTexture then
                     iconTexture:SetTexCoord(0, 1, 0, 1);
@@ -1207,7 +1207,7 @@ function DQuestFrameGreetingPanel_OnShow()
         end
     end
 
-    -- Потом показываем ДОСТУПНЫЕ задания (можно взять)
+    -- Then show AVAILABLE quests (can be taken)
     if (numAvailableQuests > 0) then
         for i = 1, numAvailableQuests, 1 do
             local questTitleButton = getglobal("DQuestTitleButton" .. buttonIndex);
@@ -1216,7 +1216,7 @@ function DQuestFrameGreetingPanel_OnShow()
             local questTitle, isTrivial, isDaily, isRepeatable;
             
             if table.getn(gossipAvailableQuests) > 0 then
-                -- Gossip API 3.3.5: title, level, isLowLevel, isDaily, isRepeatable (5 полей)
+                -- Gossip API 3.3.5: title, level, isLowLevel, isDaily, isRepeatable (5 fields)
                 local availableFields = 5;
                 local baseIndex = (i - 1) * availableFields + 1;
                 questTitle = gossipAvailableQuests[baseIndex];
@@ -1231,7 +1231,7 @@ function DQuestFrameGreetingPanel_OnShow()
             end
             
             if DialogUI_Config and DialogUI_Config.hideTrivialQuests and isTrivial then
-                -- Пропускаем тривиальные задания
+                -- Skip trivial quests
             elseif questTitle and questTitle ~= "" then
                 local displayText
                 if (buttonIndex <= 9) then
@@ -1242,7 +1242,7 @@ function DQuestFrameGreetingPanel_OnShow()
                 
                 DQuestTitleButton_SetText(questTitleButton, displayText, buttonIndex)
                 
-                -- Устанавливаем иконку для доступного задания
+                -- Set icon for available quest
                 local iconTexture = getglobal(questTitleButton:GetName() .. "QuestIcon");
                 if iconTexture then
                     iconTexture:SetTexCoord(0, 1, 0, 1);
@@ -1275,7 +1275,7 @@ function DQuestFrameGreetingPanel_OnShow()
         end
     end
 
-    -- Скрываем неиспользуемые кнопки
+    -- Hide unused buttons
     for i = buttonIndex, MAX_NUM_QUESTS, 1 do
         local btn = getglobal("DQuestTitleButton" .. i);
         if btn then btn:Hide(); end
@@ -1290,47 +1290,47 @@ function DQuestFrameGreetingPanel_OnShow()
     DQuestFrame_GossipData = nil
 end
 
--- Функция для установки текста кнопки с автопереносом и расширением
+-- Function to set button text with word wrap and expansion
 function DQuestTitleButton_SetText(button, text, buttonIndex)
     if not button then return end
     
     local fontString = button:GetFontString()
     if not fontString then return end
     
-    -- Устанавливаем текст с переносом
+    -- Set text with wrapping
     fontString:SetText(text)
     
-    -- Разрешаем перенос слов
+    -- Allow word wrap
     fontString:SetWordWrap(true)
     
-    -- Устанавливаем максимальную ширину для переноса
+    -- Set maximum width for wrapping
     fontString:SetWidth(360)
     
-    -- Принудительно вычисляем размеры
-    fontString:SetHeight(0) -- Авто-высота
+    -- Force size calculation
+    fontString:SetHeight(0) -- Auto height
     
-    -- Получаем реальные размеры текста
+    -- Get actual text dimensions
     local textWidth = fontString:GetStringWidth()
     local textHeight = fontString:GetStringHeight()
     
-    -- Минимальная высота кнопки 24px, но если текст длинный - расширяем
+    -- Minimum button height 24px, expand for longer text
     local newHeight = math.max(24, textHeight + 8)
     
-    -- Устанавливаем новую высоту кнопки
+    -- Set new button height
     button:SetHeight(newHeight)
     
-    -- Обновляем фоновую текстуру (но НЕ иконку!)
+    -- Update background texture (but NOT the icon!)
     local bg = getglobal(button:GetName() .. "ProgressBackground")
     if bg then
         bg:SetWidth(math.min(textWidth + 45, 400))
         bg:SetHeight(newHeight)
     end
     
-    -- ИСПРАВЛЕНО: Не меняем размер иконки!
-    -- Иконка должна оставаться 24x24, как задано в XML
+    -- Do NOT resize the icon!
+    -- The icon should remain 24x24 as defined in XML
 end
 
--- Функция для обновления размера фона под текстом квеста
+-- Function to update the background size under quest text
 function DQuestTitleButton_UpdateProgressBackground(button)
     if not button then return end
     
@@ -1342,10 +1342,10 @@ function DQuestTitleButton_UpdateProgressBackground(button)
         local textHeight = text:GetStringHeight();
         
         if textWidth > 0 then
-            -- Ширина = ширина текста + отступы
-            -- 35px - место под иконку слева, 10px - отступ справа
+            -- Width = text width + padding
+            -- 35px - space for icon on the left, 10px - right padding
             bg:SetWidth(textWidth + 45);
-            -- Высота = высота текста + небольшие отступы
+            -- Height = text height + small padding
             bg:SetHeight(math.max(24, textHeight + 4));
         end
     end
@@ -1354,7 +1354,7 @@ end
 function DQuestFrame_OnKeyDown()
     local key = arg1;
     
-    -- Список клавиш движения (SPACE убран!)
+    -- Movement keys list (SPACE removed!)
     local movementKeys = {
         W = true, A = true, S = true, D = true,
         UP = true, DOWN = true, LEFT = true, RIGHT = true,
@@ -1369,20 +1369,20 @@ function DQuestFrame_OnKeyDown()
     
     if key == "ESCAPE" then
         HideUIPanel(DQuestFrame);
-        DQuestFrame:EnableKeyboard(false);  -- Отключаем при закрытии
+        DQuestFrame:EnableKeyboard(false);  -- Disable on close
         return;
     end
     
-    -- Обработка ПРОБЕЛА
+    -- Handle SPACE
     if key == "SPACE" then
-        -- Принятие квеста на панели деталей
+        -- Accept quest on the detail panel
         if DQuestFrameDetailPanel and DQuestFrameDetailPanel:IsVisible() then
             if DQuestFrameAcceptButton and DQuestFrameAcceptButton:IsEnabled() then
                 AcceptQuest();
                 PlaySound("igQuestListComplete");
                 return;
             end
-        -- Завершение квеста на панели наград
+        -- Complete quest on the reward panel
         elseif DQuestFrameRewardPanel and DQuestFrameRewardPanel:IsVisible() then
             if DQuestFrameCompleteQuestButton and DQuestFrameCompleteQuestButton:IsEnabled() then
                 if (DQuestFrameRewardPanel.itemChoice == 0 and GetNumQuestChoices() > 0) then
@@ -1393,7 +1393,7 @@ function DQuestFrame_OnKeyDown()
                 end
                 return;
             end
-        -- Завершение квеста на панели прогресса
+        -- Complete quest on the progress panel
         elseif DQuestFrameProgressPanel and DQuestFrameProgressPanel:IsVisible() then
             if DQuestFrameCompleteButton and DQuestFrameCompleteButton:IsEnabled() then
                 CompleteQuest();
@@ -1403,7 +1403,7 @@ function DQuestFrame_OnKeyDown()
         end
     end
 
-    -- Обработка цифровых клавиш 1-9
+    -- Handle number keys 1-9
     if (key >= "1" and key <= "9") then
         local buttonNum = tonumber(key);
         
@@ -1429,7 +1429,6 @@ function DQuestFrame_OnKeyDown()
 end
 
 function DQuestFrame_OnShow()
-    -- DQuestFrame:EnableKeyboard(false);
     PlaySound("igQuestListOpen");
     
     if DialogUI_ApplyAlpha then
@@ -1497,7 +1496,7 @@ function DQuestTitleButton_OnClick()
     DebugMsg(string.format("DEBUG: Button ID: %d, isActive: %s, isGossip: %s, type: %s", 
         buttonID, tostring(isActive), tostring(isGossip), tostring(buttonType)));
     
-    -- ИСПРАВЛЕНО: Для gossip-квестов используем SelectGossip* функции
+    -- For gossip quests use SelectGossip* functions
     if isGossip then
         if isActive == 1 then
             DebugMsg(string.format("DEBUG: Selecting Gossip Active Quest %d", buttonID));
@@ -1507,7 +1506,7 @@ function DQuestTitleButton_OnClick()
             SelectGossipAvailableQuest(buttonID);
         end
     else
-        -- Для обычных QUEST_GREETING квестов
+        -- For standard QUEST_GREETING quests
         if isActive == 1 then
             DebugMsg(string.format("DEBUG: Selecting Standard Active Quest %d", buttonID));
             SelectActiveQuest(buttonID);
@@ -1625,7 +1624,7 @@ function DQuestFrameItems_Update(questState)
             questItem:SetID(i)
             questItem:Show();
             questItem.rewardType = "item"
-			DQuestFrame_UpdateItemUsability(questItem, questItem.type, i)
+            DQuestFrame_UpdateItemUsability(questItem, questItem.type, i)
             QuestFrame_SetAsLastShown(questItem, spacerFrame);
             
             local itemNameText = getglobal(questItemName .. index .. "Name");
@@ -1650,14 +1649,14 @@ function DQuestFrameItems_Update(questState)
             end
             if (i > 1) then
                 if (mod(i, 2) == 1) then
-                    -- ИСПРАВЛЕНО: Увеличен отступ между строками предметов
+                    -- Increased spacing between item rows
                     questItem:SetPoint("TOPLEFT", questItemName .. (index - 2), "BOTTOMLEFT", 0, -25);
                 else
-                    -- ИСПРАВЛЕНО: Увеличен отступ между предметами в строке
+                    -- Increased spacing between items in a row
                     questItem:SetPoint("TOPLEFT", questItemName .. (index - 1), "TOPRIGHT", 50, 0);
                 end
             else
-                -- ИСПРАВЛЕНО: Увеличен отступ от текста "Вы получите на выбор"
+                -- Increased offset from "You will receive one of" text
                 questItem:SetPoint("TOPLEFT", itemChooseText, "BOTTOMLEFT", -3, -15);
             end
             rewardsCount = rewardsCount + 1;
@@ -1674,7 +1673,7 @@ function DQuestFrameItems_Update(questState)
         QuestFrame_SetAsLastShown(learnSpellText, spacerFrame);
 
         if (rewardsCount > 0) then
-            -- ИСПРАВЛЕНО: Увеличен отступ от последнего предмета
+            -- Increased offset from last item
             learnSpellText:SetPoint("TOPLEFT", questItemName .. rewardsCount, "BOTTOMLEFT", 3, -15);
         else
             learnSpellText:SetPoint("TOPLEFT", questState .. "RewardTitleText", "BOTTOMLEFT", 0, -15);
@@ -1705,7 +1704,7 @@ function DQuestFrameItems_Update(questState)
             spellNameText:SetTextColor(1.0, 0.82, 0.0);
         end
         
-        -- ИСПРАВЛЕНО: Увеличен отступ от текста заклинания
+        -- Increased offset from spell text
         questItem:SetPoint("TOPLEFT", learnSpellText, "BOTTOMLEFT", -3, -15);
         lastAnchorFrame = questItem;
     else
@@ -1717,7 +1716,7 @@ function DQuestFrameItems_Update(questState)
         
         if (numQuestSpellRewards > 0) then
             questItemReceiveText:SetText(TEXT(REWARD_ITEMS));
-            -- ИСПРАВЛЕНО: Увеличен отступ от заклинания
+            -- Increased offset from spell
             questItemReceiveText:SetPoint("TOPLEFT", questItemName .. rewardsCount, "BOTTOMLEFT", 3, -15);
         elseif (numQuestChoices > 0) then
             questItemReceiveText:SetText(TEXT(REWARD_ITEMS));
@@ -1725,11 +1724,11 @@ function DQuestFrameItems_Update(questState)
             if (mod(index, 2) == 0) then
                 index = index - 1;
             end
-            -- ИСПРАВЛЕНО: Увеличен отступ от предметов выбора
+            -- Increased offset from choice items
             questItemReceiveText:SetPoint("TOPLEFT", questItemName .. index, "BOTTOMLEFT", 3, -15);
         else
             questItemReceiveText:SetText(TEXT(REWARD_ITEMS_ONLY));
-            -- ИСПРАВЛЕНО: Увеличен отступ от заголовка наград
+            -- Increased offset from reward title
             questItemReceiveText:SetPoint("TOPLEFT", questState .. "RewardTitleText", "BOTTOMLEFT", 3, -15);
         end
         questItemReceiveText:Show();
@@ -1761,7 +1760,7 @@ function DQuestFrameItems_Update(questState)
             questItem:SetID(i)
             questItem:Show();
             questItem.rewardType = "item";
-			DQuestFrame_UpdateItemUsability(questItem, questItem.type, i)
+            DQuestFrame_UpdateItemUsability(questItem, questItem.type, i)
             QuestFrame_SetAsLastShown(questItem, spacerFrame);
             
             local rewardNameText = getglobal(questItemName .. index .. "Name");
@@ -1787,74 +1786,74 @@ function DQuestFrameItems_Update(questState)
 
             if (i > 1) then
                 if (mod(i, 2) == 1) then
-                    -- ИСПРАВЛЕНО: Увеличен отступ между строками предметов
+                    -- Increased spacing between item rows
                     questItem:SetPoint("TOPLEFT", questItemName .. (index - 2), "BOTTOMLEFT", 0, -30);
                 else
-                    -- ИСПРАВЛЕНО: Увеличен отступ между предметами в строке
+                    -- Increased spacing between items in a row
                     questItem:SetPoint("TOPLEFT", questItemName .. (index - 1), "TOPRIGHT", 60, 0);
                 end
             else
-                -- ИСПРАВЛЕНО: Увеличен отступ от текста "Вы также получите"
+                -- Increased offset from "You will also receive" text
                 questItem:SetPoint("TOPLEFT", questState .. "ItemReceiveText", "BOTTOMLEFT", -3, -30);
             end
             rewardsCount = rewardsCount + 1;
             lastAnchorFrame = questItem;
         end
         
-        -- Блок XP
-		if xp and xp > 0 then
-			local xpIcon = getglobal(questState .. "XPIcon");
-			if not xpIcon then
-				xpIcon = questItemReceiveText:GetParent():CreateTexture(questState .. "XPIcon", "ARTWORK");
-			end
-			
-			xpIcon:SetTexture("Interface\\AddOns\\DialogUI\\src\\assets\\art\\icons\\XP-Green.blp");
-			if not xpIcon:GetTexture() then
-				xpIcon:SetTexture("Interface\\AddOns\\DialogUI\\src\\assets\\art\\icons\\XP-Green");
-			end
-			
-			xpIcon:SetWidth(32);
-			xpIcon:SetHeight(32);
-			
-			local xpRewardText = getglobal(questState .. "XPRewardText");
-			if not xpRewardText then
-				xpRewardText = questItemReceiveText:GetParent():CreateFontString(questState .. "XPRewardText", "ARTWORK", "DQuestFont");
-			end
-			
-			local xpText = "Опыт " .. xp;
-			
-			xpRewardText:SetText(xpText);
-			SetFontColor(xpRewardText, "DarkBrown");
-			
-			if rewardsCount > baseIndex then
-				local lastItemIndex = rewardsCount;
-				if mod(lastItemIndex - baseIndex, 2) == 0 then
-					lastItemIndex = lastItemIndex - 1;
-				end
-				
-				xpIcon:ClearAllPoints();
-				-- ИСПРАВЛЕНО: Уменьшен отступ от последнего предмета
-				xpIcon:SetPoint("TOPLEFT", questItemName .. lastItemIndex, "BOTTOMLEFT", 0, -15);
-				xpIcon:Show();
-				
-				xpRewardText:ClearAllPoints();
-				xpRewardText:SetPoint("LEFT", questState .. "XPIcon", "RIGHT", 5, 0);
-			else
-				xpIcon:ClearAllPoints();
-				-- ИСПРАВЛЕНО: Уменьшен отступ от текста "Вы также получите"
-				xpIcon:SetPoint("TOPLEFT", questItemReceiveText, "BOTTOMLEFT", 0, -10);
-				xpIcon:Show();
-				
-				xpRewardText:ClearAllPoints();
-				xpRewardText:SetPoint("LEFT", questState .. "XPIcon", "RIGHT", 5, 0);
-			end
-			xpRewardText:Show();
-		else
-			local xpIcon = getglobal(questState .. "XPIcon");
-			if xpIcon then
-				xpIcon:Hide();
-			end
-		end
+        -- XP block
+        if xp and xp > 0 then
+            local xpIcon = getglobal(questState .. "XPIcon");
+            if not xpIcon then
+                xpIcon = questItemReceiveText:GetParent():CreateTexture(questState .. "XPIcon", "ARTWORK");
+            end
+            
+            xpIcon:SetTexture("Interface\\AddOns\\DialogUI\\src\\assets\\art\\icons\\XP-Green.blp");
+            if not xpIcon:GetTexture() then
+                xpIcon:SetTexture("Interface\\AddOns\\DialogUI\\src\\assets\\art\\icons\\XP-Green");
+            end
+            
+            xpIcon:SetWidth(32);
+            xpIcon:SetHeight(32);
+            
+            local xpRewardText = getglobal(questState .. "XPRewardText");
+            if not xpRewardText then
+                xpRewardText = questItemReceiveText:GetParent():CreateFontString(questState .. "XPRewardText", "ARTWORK", "DQuestFont");
+            end
+            
+            local xpText = "Experience " .. xp;
+            
+            xpRewardText:SetText(xpText);
+            SetFontColor(xpRewardText, "DarkBrown");
+            
+            if rewardsCount > baseIndex then
+                local lastItemIndex = rewardsCount;
+                if mod(lastItemIndex - baseIndex, 2) == 0 then
+                    lastItemIndex = lastItemIndex - 1;
+                end
+                
+                xpIcon:ClearAllPoints();
+                -- Reduced offset from last item
+                xpIcon:SetPoint("TOPLEFT", questItemName .. lastItemIndex, "BOTTOMLEFT", 0, -15);
+                xpIcon:Show();
+                
+                xpRewardText:ClearAllPoints();
+                xpRewardText:SetPoint("LEFT", questState .. "XPIcon", "RIGHT", 5, 0);
+            else
+                xpIcon:ClearAllPoints();
+                -- Reduced offset from "You will also receive" text
+                xpIcon:SetPoint("TOPLEFT", questItemReceiveText, "BOTTOMLEFT", 0, -10);
+                xpIcon:Show();
+                
+                xpRewardText:ClearAllPoints();
+                xpRewardText:SetPoint("LEFT", questState .. "XPIcon", "RIGHT", 5, 0);
+            end
+            xpRewardText:Show();
+        else
+            local xpIcon = getglobal(questState .. "XPIcon");
+            if xpIcon then
+                xpIcon:Hide();
+            end
+        end
     else
         questItemReceiveText:Hide();
         local xpRewardText = getglobal(questState .. "XPRewardText");
@@ -1949,16 +1948,16 @@ function UpdateQuestIcons()
         iconTexture:SetHeight(24);
         
         if button.type == "Active" then
-            -- Активный квест (в процессе выполнения)
+            -- Active quest (in progress)
             if button.isComplete then
-                -- Выполнен - можно сдать
+                -- Complete - ready to turn in
                 if button.isDaily then
                     iconTexture:SetTexture("Interface\\AddOns\\DialogUI\\src\\assets\\art\\icons\\CompleteDailyQuest");
                 else
                     iconTexture:SetTexture("Interface\\AddOns\\DialogUI\\src\\assets\\art\\icons\\completeQuestIcon");
                 end
             else
-                -- Не выполнен - в процессе
+                -- Not complete - in progress
                 if button.isDaily then
                     iconTexture:SetTexture("Interface\\AddOns\\DialogUI\\src\\assets\\art\\icons\\DailyQuest");
                 else
@@ -1967,7 +1966,7 @@ function UpdateQuestIcons()
             end
             
         elseif button.type == "Available" then
-            -- Доступный квест (можно взять)
+            -- Available quest (can be taken)
             if button.isDaily then
                 iconTexture:SetTexture("Interface\\AddOns\\DialogUI\\src\\assets\\art\\icons\\DailyQuest");
             elseif button.isRepeatable then
@@ -2150,25 +2149,25 @@ function DialogUI_ApplyAlpha()
 end
 
 function DialogUI_ApplyAlphaToPanel(panel, alpha)
-	if not panel then return; end
+    if not panel then return; end
 
-	local regions = {panel:GetRegions()};
-	for i = 1, table.getn(regions) do
-		local region = regions[i];
-		if region and region:GetObjectType() == "Texture" then
-			local texturePath = region:GetTexture();
-			if texturePath and (
-				string.find(texturePath, "Parchment") or
-				string.find(texturePath, "Interface\\AddOns\\DialogUI\\src\\assets\\art\\parchment\\Parchment")
-				) then
-				region:SetAlpha(alpha);
-				break;
-			end
-		end
-	end
+    local regions = {panel:GetRegions()};
+    for i = 1, table.getn(regions) do
+        local region = regions[i];
+        if region and region:GetObjectType() == "Texture" then
+            local texturePath = region:GetTexture();
+            if texturePath and (
+                string.find(texturePath, "Parchment") or
+                string.find(texturePath, "Interface\\AddOns\\DialogUI\\src\\assets\\art\\parchment\\Parchment")
+                ) then
+                region:SetAlpha(alpha);
+                break;
+            end
+        end
+    end
 end
 
--- Временный тест - показать иконку на всех предметах
+-- Temporary test - show icon on all items
 function DQuestFrame_DebugShowAllIcons()
     for i = 1, 10 do
         local item = getglobal("DQuestRewardItem" .. i)
