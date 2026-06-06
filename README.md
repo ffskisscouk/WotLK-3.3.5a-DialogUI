@@ -1,29 +1,27 @@
-# 📜 DialogUI Enhanced
+📜 DialogUI Enhanced
+A beautiful, extended fork of the original DialogUI addon
 
-> **Красивый, расширенный форк оригинального аддона DialogUI**
+DialogUI Enhanced is an improved fork of the original DialogUI addon that transforms the quest and dialogue windows in World of Warcraft by adding a stunning parchment-themed interface to them. This version adds powerful new features while maintaining the beautiful aesthetic that made the original so popular.
 
-**DialogUI Enhanced** — это улучшенный форк оригинального аддона [DialogUI](https://github.com/Jslquintero/DialogUI), который преобразует окна заданий и диалогов в World of Warcraft, добавляя им потрясающий тематический интерфейс в стиле пергамента. Эта версия добавляет мощные новые функции, сохраняя прекрасную эстетику, сделавшую оригинал таким популярным.
+🌟 What's new in this fork
+This improved version builds on the foundation of the original DialogUI and adds:
 
-## 🌟 Что нового в этом форке
+🎯 Movable windows — drag and drop tasks and dialog windows anywhere on the screen
+💾 Save Positions - Window positions are saved between game sessions
+⚙️ Advanced Settings Panel – A beautiful in-game settings window with the ability to:
+Zoom adjustments (0.5x to 2.0x)
+Transparency settings (10% to 100%)
+Font scale changes (from 0.5x to 2.0x)
+🎥 Dynamic Camera System - Smooth camera transitions when interacting with NPCs:
+Customizable distance and angle
+Separate settings for dialogs, traders, trainers, and quests
+Smooth transitions with customizable speed
+Multiple Presets (Cinematic, Close, Normal, Wide)
+📜🎨 Single theme "parchment" - all windows use the same papyrus style
+⌨️ ESC key support - press ESC or Reject to close job windows correctly
+🖼️ Improved icon system — native icons of dialogs with proper processing in case of their absence
 
-Эта улучшенная версия построена на фундаменте оригинального DialogUI и добавляет:
-
-- **🎯 Перемещаемые окна** — перетаскивайте окна заданий и диалогов в любое место экрана
-- **💾 Сохранение позиций** — положения окон сохраняются между игровыми сессиями
-- **⚙️ Расширенная панель настройки** — красивое внутриигровое окно настроек с возможностью:
-  - Регулировки масштаба (от 0.5x до 2.0x)
-  - Настройки прозрачности (от 10% до 100%)
-  - Изменения масштаба шрифта (от 0.5x до 2.0x)
-- **🎥 Динамическая система камеры** — плавные переходы камеры при взаимодействии с NPC:
-  - Настраиваемое расстояние и угол
-  - Отдельные настройки для диалогов, торговцев, тренеров и заданий
-  - Плавные переходы с настраиваемой скоростью
-  - Несколько предустановок (Кинематографичный, Близко, Обычный, Широкий)
-- **📜🎨 Единая тема "пергамент"** — все окна используют единую стилистику папируса
-- **⌨️ Поддержка клавиши ESC** — нажмите ESC или "Отклонить" для правильного закрытия окон заданий
-- **🖼️ Улучшенная система иконок** — нативные иконки диалогов с правильной обработкой на случай их отсутствия
-
-## 📸 Галерея
+📸 Gallery
 
 <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
   <img src="https://raw.githubusercontent.com/Jslquintero/DialogUI/main/src/preview/Screenshot%20From%202025-06-18%2000-34-14.png" style="width: 30%; min-width: 200px;" />
@@ -35,33 +33,28 @@
   <img src="https://raw.githubusercontent.com/Jslquintero/DialogUI/main/src/preview/Screenshot%20From%202025-06-18%2000-41-14.png" style="width: 30%; min-width: 200px;" />
   <img src="https://raw.githubusercontent.com/Jslquintero/DialogUI/main/src/preview/Screenshot%20From%202025-06-18%2000-42-06.png" style="width: 30%; min-width: 200px;" />
 </div>
-примерно так
+something like this
 
-## ⚡ Быстрый старт
+⚡ Quick start
+Installation: Unzip to folder Interface/AddOns/
+Enablement: Activate "DialogUI" in the addon list
+Setting: Use in chat to open settings/dialogui
+Delight: Take advantage of beautiful movable quest and dialogue windows!
 
-1. **Установка**: Распакуйте в папку `Interface/AddOns/`
-2. **Включение**: Активируйте "DialogUI" в списке аддонов
-3. **Настройка**: Используйте `/dialogui` в чате для открытия настроек
-4. **Наслаждение**: Пользуйтесь красивыми перемещаемыми окнами заданий и диалогов!
+## 🎮 Commands
 
-## 🎮 Команды
-
-| Команда | Описание |
+| Team | Description |
 |---------|-------------|
-| `/dialogui` | Открыть окно настроек |
-| `/resetdialogs` | Сбросить позиции всех окон |
-| `/debugdialogs` | Показать отладочную информацию |
-| `/togglecamera` | Включить/выключить динамическую камеру |
-| `/testcamera` | Протестировать позиционирование камеры |
-| `/cameradebug` | Показать отладочную информацию о камере и фреймах |
-| `/camerapreset [название]` | Применить предустановку камеры (cinematic, close, normal, wide) |
+| `/dialogui` | Open the settings window |
+| `/resetdialogs` | Reset all windows |
+| `/debugdialogs` | Show debugging information |
+| `/togglecamera` | Turn on/off the dynamic camera |
+| `/testcamera` | Test camera positioning |
+| `/cameradebug` | Show debug information about the camera and frames |
+| `/camerapreset [Name]` | Apply camera preset (cinematic, close, normal, wide)) |
 
-## 🔧 Совместимость
-
-- ✅ **WOW WOTLK** (3.3.5)
-- ⚠️ Создан для русскоязычного клиента 
-
-## 🎨 Оригинальное вдохновение
+🔧 Compatibility
+✅ WOW WOTLK (3.3.5)
 
 Этот аддон вдохновлен [DialogueUI](https://www.curseforge.com/wow/addons/dialogueui) и использует улучшенный оригинальный код Blizzard с нативной обработкой иконок.
 
