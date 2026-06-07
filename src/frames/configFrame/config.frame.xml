@@ -97,7 +97,7 @@
                 </Texture>
             </Layer>
             <Layer level="ARTWORK">
-                <FontString name="DConfigFrameTitle" inherits="DQuestTitleFont" text="Настройки DialogUI" justifyH="CENTER">
+                <FontString name="DConfigFrameTitle" inherits="DQuestTitleFont" text="Settings DialogUI" justifyH="CENTER">
                     <Size>
                         <AbsDimension x="430" y="25"/>
                     </Size>
@@ -146,7 +146,7 @@
                                 </FontString>
                                 
                                 <!-- Scale Label -->
-                                <FontString name="DConfigScaleLabel" inherits="DQuestButtonTitleGossip" text="Масштаб:" justifyH="LEFT">
+                                <FontString name="DConfigScaleLabel" inherits="DQuestButtonTitleGossip" text="Scale:" justifyH="LEFT">
                                     <Size>
                                         <AbsDimension x="345" y="20" />
                                     </Size>
@@ -160,7 +160,7 @@
                                 </FontString>
                                 
                                 <!-- Transparency Label -->
-                                <FontString name="DConfigAlphaLabel" inherits="DQuestButtonTitleGossip" text="Прозрачность:" justifyH="LEFT">
+                                <FontString name="DConfigAlphaLabel" inherits="DQuestButtonTitleGossip" text="Transparency:" justifyH="LEFT">
                                     <Size>
                                         <AbsDimension x="345" y="20" />
                                     </Size>
@@ -174,7 +174,7 @@
                                 </FontString>
                                 
                                 <!-- Font Size Label -->
-                                <FontString name="DConfigFontLabel" inherits="DQuestButtonTitleGossip" text="Размер шрифта:" justifyH="LEFT">
+                                <FontString name="DConfigFontLabel" inherits="DQuestButtonTitleGossip" text="Font size:" justifyH="LEFT">
                                     <Size>
                                         <AbsDimension x="345" y="20" />
                                     </Size>
@@ -188,7 +188,7 @@
                                 </FontString>
 
                                 <!-- Font Select Label -->
-                                <FontString name="DConfigFontSelectLabel" inherits="DQuestButtonTitleGossip" text="Шрифт:" justifyH="LEFT">
+                                <FontString name="DConfigFontSelectLabel" inherits="DQuestButtonTitleGossip" text="Font:" justifyH="LEFT">
                                     <Size>
                                         <AbsDimension x="345" y="20" />
                                     </Size>
@@ -318,7 +318,7 @@
             </ScrollFrame>
             
             <!-- Fixed buttons outside scroll area -->
-            <Button name="DConfigResetButton" inherits="DUIPanelButtonTemplate" text="СБРОСИТЬ">
+            <Button name="DConfigResetButton" inherits="DUIPanelButtonTemplate" text="Reset">
                 <Size>
                     <AbsDimension x="180" y="35" />
                 </Size>
@@ -336,7 +336,7 @@
                 </Scripts>
             </Button>
 
-            <Button name="DConfigCloseButton" inherits="DUIPanelButtonTemplate" text="ЗАКРЫТЬ">
+            <Button name="DConfigCloseButton" inherits="DUIPanelButtonTemplate" text="Close">
                 <Size>
                     <AbsDimension x="180" y="35" />
                 </Size>
