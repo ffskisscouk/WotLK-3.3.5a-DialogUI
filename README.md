@@ -2,6 +2,8 @@ DialogUI
 
 Fork of Russian https://github.com/Kolorado1976/DialogUI_3.3.5 translated into english.  some updated assets taken from  https://github.com/Jslquintero/DialogUI
 
+RENAME FOLDER TO "DialogUI"  and place it in the Addons folder
+
 
 📜 DialogUI Enhanced
 A beautiful, expanded fork of the original DialogUI addon
