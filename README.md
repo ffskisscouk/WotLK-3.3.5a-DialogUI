@@ -1,6 +1,8 @@
 DialogUI
 
-Fork of Russian https://github.com/Kolorado1976/DialogUI_3.3.5 translated into english.  some updated assets taken from  https://github.com/Jslquintero/DialogUI
+Fork of Russian https://github.com/Kolorado1976/DialogUI_3.3.5 translated into english.  
+
+Some updated assets taken from  https://github.com/Jslquintero/DialogUI
 
 RENAME FOLDER TO "DialogUI"  and place it in the Addons folder
 
@@ -68,9 +70,9 @@ Configure: Use /dialogui in chat to open settings
 
 Enjoy: Use beautiful movable quest and dialogue windows!
 
-## 🎮 Команды
+## 🎮 Commands
 
-| Commands |
+| Commands | Description |
 |---------|-------------|
 | `/dialogui` |  Open settings window |
 | `/resetdialogs` |  Open settings window |
@@ -80,7 +82,8 @@ Enjoy: Use beautiful movable quest and dialogue windows!
 | `/cameradebug` | Show debug info about camera and frames |
 | `/camerapreset [name]` | Apply camera preset (cinematic, close, normal, wide) |
 
+
 ## 🔧 Compatibility 
 
-- ✅ **WOW WOTLK** (3.3.5)
+- ✅ **WOW WOTLK** (3.3.5a)
 - ⚠️  Designed for the english-language client
