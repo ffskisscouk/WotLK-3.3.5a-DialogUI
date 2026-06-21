@@ -8,9 +8,9 @@
 ## SavedVariables: DialogUIFramePosition, DialogUI_SavedConfig, DialogUI_CameraSaved, DialogUI_QuestNotes
 ## X-Sirus-Update https://github.com/fxpw/RaidBrowser/tree/master
 ## X-Sirus-Category 13
-## X-Adapted-By: Velord
+## X-Adapted-By: ffskiss
 ## X-Adaptation-For: 3.3.5
-## X-Adaptation-Fixes: Исправлена блокировка движения при открытых окнах
+## X-Adaptation-Fixes: Translated russian to english, updated assets
 
 # Fonts used for the frames
 src\assets\font\fonts.xml
