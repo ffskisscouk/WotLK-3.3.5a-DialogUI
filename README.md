@@ -70,15 +70,15 @@ Enjoy: Use beautiful movable quest and dialogue windows!
 
 ## 🎮 Команды
 
-| Команда | Описание |
+| Commands |
 |---------|-------------|
-| `/dialogui` | Открыть окно настроек |
-| `/resetdialogs` | Сбросить позиции всех окон |
-| `/debugdialogs` | Показать отладочную информацию |
-| `/togglecamera` | Включить/выключить динамическую камеру |
-| `/testcamera` | Протестировать позиционирование камеры |
-| `/cameradebug` | Показать отладочную информацию о камере и фреймах |
-| `/camerapreset [название]` | Применить предустановку камеры (cinematic, close, normal, wide) |
+| `/dialogui` |  Open settings window |
+| `/resetdialogs` |  Open settings window |
+| `/debugdialogs` | Show debug information |
+| `/togglecamera` | Enable/disable dynamic camera |
+| `/testcamera` | Test camera positioning |
+| `/cameradebug` | Show debug info about camera and frames |
+| `/camerapreset [name]` | Apply camera preset (cinematic, close, normal, wide) |
 
 ## 🔧 Совместимость
 
