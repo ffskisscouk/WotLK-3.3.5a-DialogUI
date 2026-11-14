@@ -438,6 +438,7 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/..\FrameXML\UI.xsd">
         </OnShow>
         <OnHide>
             PlaySound("igQuestListClose");
+            CloseGossip();
         </OnHide>
         <OnMouseWheel>
             return false;

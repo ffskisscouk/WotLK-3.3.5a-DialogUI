@@ -1351,6 +1351,37 @@ function DQuestTitleButton_UpdateProgressBackground(button)
     end
 end
 
+-- Keys the quest window doesn't use still run their normal key binding (mark tool, screenshot, bags...). 3.3.5 has
+-- no SetPropagateKeyboardInput, so while the window has the keyboard it would swallow them all.
+DQuestFrame_ProtectedBindings = {
+    "ACTIONBUTTON", "MULTIACTIONBAR", "BONUSACTIONBUTTON", "SHAPESHIFTBUTTON", "PETACTIONBUTTON", "ACTIONPAGE",
+    "MOVE", "TURN", "STRAFE", "PITCH", "JUMP", "TOGGLEAUTORUN", "SITORSTAND", "TOGGLERUN",
+    "TARGET", "ASSIST", "FOCUS", "INTERACT", "STARTATTACK", "STOPATTACK", "PETATTACK", "STOPCASTING",
+    "CLICK ", "SPELL ", "MACRO ", "ITEM ", "VEHICLE",
+};
+local function DQuestFrame_RunKeyBinding(key)
+    if key == "LSHIFT" or key == "RSHIFT" or key == "LCTRL" or key == "RCTRL" or key == "LALT" or key == "RALT" then
+        return;
+    end
+    local bind = key;
+    if IsShiftKeyDown() then bind = "SHIFT-" .. bind; end
+    if IsControlKeyDown() then bind = "CTRL-" .. bind; end
+    if IsAltKeyDown() then bind = "ALT-" .. bind; end
+    local action = GetBindingAction(bind);
+    if not action or action == "" then
+        return;
+    end
+    -- Protected bindings (action bars, targeting, movement, secure clicks) can't run from an addon: hand the keyboard
+    -- back instead, as for the movement keys, so the next press reaches the game.
+    for _, prefix in ipairs(DQuestFrame_ProtectedBindings) do
+        if string.find(action, prefix, 1, true) == 1 then
+            DQuestFrame:EnableKeyboard(false);
+            return;
+        end
+    end
+    RunBinding(action);
+end
+
 function DQuestFrame_OnKeyDown()
     local key = arg1;
     
@@ -1378,7 +1409,7 @@ function DQuestFrame_OnKeyDown()
         -- Accept quest on the detail panel
         if DQuestFrameDetailPanel and DQuestFrameDetailPanel:IsVisible() then
             if DQuestFrameAcceptButton and DQuestFrameAcceptButton:IsEnabled() then
-                AcceptQuest();
+                DQuestDetailAcceptButton_OnClick();
                 PlaySound("igQuestListComplete");
                 return;
             end
@@ -1425,6 +1456,12 @@ function DQuestFrame_OnKeyDown()
                 questButton:Click();
             end
         end
+        return;
+    end
+
+    -- SPACE stays reserved for the window (no jump while reading)
+    if key ~= "SPACE" then
+        DQuestFrame_RunKeyBinding(key);
     end
 end
 
@@ -1894,6 +1931,13 @@ function DQuestFrameDetailPanel_OnShow()
     DTextAlphaDependentFrame:SetAlpha(0);
     DQuestFrameAcceptButton:Disable();
 
+    -- Auto-accept quests are already in the log; there is nothing to decline
+    if ( QuestGetAutoAccept() ) then
+        DQuestFrameDeclineButton:Hide();
+    else
+        DQuestFrameDeclineButton:Show();
+    end
+
     DQuestFrameDetailPanel.fading = 1;
     DQuestFrameDetailPanel.fadingProgress = 0;
     DQuestDescription:SetAlphaGradient(0, QUEST_DESCRIPTION_GRADIENT_LENGTH);
@@ -1923,7 +1967,12 @@ function DQuestFrameDetailPanel_OnUpdate(elapsed)
 end
 
 function DQuestDetailAcceptButton_OnClick()
-    AcceptQuest();
+    -- The server already added auto-accept quests; accepting again errors
+    if ( QuestGetAutoAccept() ) then
+        HideUIPanel(DQuestFrame);
+    else
+        AcceptQuest();
+    end
 end
 
 function DQuestDetailDeclineButton_OnClick()
